@@ -1,0 +1,11 @@
+
+Flask==2.3.3
+reportlab==4.0.4
+Pillow==10.0.0
+
+streamlit
+reportlab
+streamlit-drawable-canvas
+Pillow
+PyPDF2
+
