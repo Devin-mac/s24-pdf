@@ -79,11 +79,11 @@ with st.form("formulario"):
     enviado = st.form_submit_button("📤 Generar PDF")
 
 # --- Insertar firmas ---
-def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
+def insertar_firmas(pdf_bytes):
     firma_buffer = BytesIO()
     can = canvas.Canvas(firma_buffer, pagesize=letter)
 
-    for idx, firma_data in enumerate([firma1_data, firma2_data]):
+    for idx, firma_data in enumerate([firma1.image_data, firma2.image_data]):
         if firma_data is not None:
             firma_img = Image.fromarray(firma_data)
             img_stream = BytesIO()
@@ -91,7 +91,8 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
             img_stream.seek(0)
 
             x = 60 if idx == 0 else 310
-            can.drawImage(ImageReader(img_stream), x, 150, width=120, height=40)
+            y = 100  # altura corregida para que esté dentro del recuadro
+            can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
     can.save()
     firma_buffer.seek(0)
@@ -178,16 +179,17 @@ def crear_pdf():
     y -= 40
 
     # Nombres
+        # Nombres centrados
     can.setFont("Helvetica", 10)
-    can.drawString(x_izq, y, "Rellenado por:")
-    can.drawString(x_izq + 100, y, nombre_1)
-    can.line(x_izq + 95, y - 2, x_izq + 250, y - 2)
+    nombres_y = y  # guardar y para usarlo luego con firmas
+    texto_nombres = f"Rellenado por: {nombre_1}        Verificado por: {nombre_2}"
+    can.drawCentredString(300, y, texto_nombres)
 
-    can.drawString(x_izq + 270, y, "Verificado por:")
-    can.drawString(x_izq + 390, y, nombre_2)
-    can.line(x_izq + 385, y - 2, x_derecha, y - 2)
+    # Líneas debajo de los nombres (centradas también)
+    can.line(120, y - 2, 250, y - 2)  # debajo de "Rellenado por"
+    can.line(360, y - 2, 490, y - 2)  # debajo de "Verificado por"
+    y -= 60
 
-    y -= 70
 
     # Firmas
     can.setFont("Helvetica", 10)
