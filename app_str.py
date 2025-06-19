@@ -79,11 +79,11 @@ with st.form("formulario"):
     enviado = st.form_submit_button("📤 Generar PDF")
 
 # --- Insertar firmas ---
-def insertar_firmas(pdf_bytes):
+def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
     firma_buffer = BytesIO()
     can = canvas.Canvas(firma_buffer, pagesize=letter)
 
-    for idx, firma_data in enumerate([firma1.image_data, firma2.image_data]):
+    for idx, firma_data in enumerate([firma1_data, firma2_data]):
         if firma_data is not None:
             firma_img = Image.fromarray(firma_data)
             img_stream = BytesIO()
@@ -91,7 +91,7 @@ def insertar_firmas(pdf_bytes):
             img_stream.seek(0)
 
             x = 60 if idx == 0 else 310
-            y = 100  # altura corregida para que esté dentro del recuadro
+            y = 100  # dentro del recuadro
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
     can.save()
@@ -109,6 +109,7 @@ def insertar_firmas(pdf_bytes):
     writer.write(final_output)
     final_output.seek(0)
     return final_output
+
 
 # --- Crear PDF desde cero ---
 def crear_pdf():
