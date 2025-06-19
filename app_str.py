@@ -84,20 +84,28 @@ def crear_pdf():
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=letter)
 
-    # Título centrado
+    # Margen izquierdo base
+    x_izq = 60
+    x_derecha = 540
+    y = 760
+
+    # Título
     can.setFont("Helvetica-Bold", 14)
-    can.drawCentredString(300, 760, "REGISTRO DE TRANSACCIÓN")
+    can.drawCentredString(300, y, "REGISTRO DE TRANSACCIÓN")
+    y -= 30
 
-    # Fecha
+    # Fecha a la derecha
     can.setFont("Helvetica", 10)
-    can.drawString(400, 735, f"Fecha: {fecha_str}")
+    can.drawRightString(x_derecha, y, f"Fecha: {fecha_str}")
+    y -= 20
 
+    # Subtítulo de tipo de transacción
     can.setFont("Helvetica-Bold", 10)
-    can.drawString(50, 735, "Seleccione el tipo de transacción:")
+    can.drawString(x_izq, y, "Seleccione el tipo de transacción:")
+    y -= 18
 
-    # Opciones de transacción
+    # Opciones tipo de transacción
     can.setFont("Helvetica", 10)
-    y_opciones = 715
     opciones = {
         "DONACIÓN": "Donación",
         "PAGO": "Pago",
@@ -106,31 +114,62 @@ def crear_pdf():
     }
     for clave, texto in opciones.items():
         marca = "X" if clave == tipo else " "
-        can.drawString(50, y_opciones, f"[{marca}] {texto}")
-        y_opciones -= 15
+        can.drawString(x_izq, y, f"[{marca}] {texto}")
+        y -= 15
 
-    # Donaciones y conceptos con alineación derecha
-    can.drawString(50, 630, "Donaciones (Obra mundial):")
-    can.drawRightString(550, 630, f"${don_obra:,.0f}")
+    # Línea horizontal
+    can.line(x_izq, y, x_derecha, y)
+    y -= 25
 
-    can.drawString(50, 610, "Donaciones (Gastos de la congregación):")
-    can.drawRightString(550, 610, f"${don_congre:,.0f}")
+    # Donaciones
+    can.setFont("Helvetica-Bold", 10)
+    can.drawString(x_izq, y, "DETALLES DE LA TRANSACCIÓN")
+    y -= 18
+    can.setFont("Helvetica", 10)
+
+    can.drawString(x_izq, y, "Donaciones (Obra mundial):")
+    can.drawRightString(x_derecha, y, f"${don_obra:,.0f}")
+    y -= 15
+
+    can.drawString(x_izq, y, "Donaciones (Gastos de la congregación):")
+    can.drawRightString(x_derecha, y, f"${don_congre:,.0f}")
+    y -= 15
 
     if concepto:
-        can.drawString(50, 590, f"{concepto}:")
-        can.drawRightString(550, 590, f"${valor_concepto:,.0f}")
+        can.drawString(x_izq, y, f"{concepto}:")
+        can.drawRightString(x_derecha, y, f"${valor_concepto:,.0f}")
+        y -= 15
+
+    # Línea horizontal
+    y -= 10
+    can.line(x_izq, y, x_derecha, y)
+    y -= 25
 
     # Total
     can.setFont("Helvetica-Bold", 12)
-    can.drawString(50, 560, "TOTAL:")
-    can.drawRightString(550, 560, f"${total:,.0f}")
+    can.drawString(x_izq, y, "TOTAL:")
+    can.drawRightString(x_derecha, y, f"${total:,.0f}")
+    y -= 40
 
     # Nombres
     can.setFont("Helvetica", 10)
-    can.drawString(50, 480, "Rellenado por:")
-    can.drawString(150, 480, nombre_1)
-    can.drawString(350, 480, "Verificado por:")
-    can.drawString(450, 480, nombre_2)
+    can.drawString(x_izq, y, "Rellenado por:")
+    can.drawString(x_izq + 100, y, nombre_1)
+    can.line(x_izq + 95, y - 2, x_izq + 250, y - 2)
+
+    can.drawString(x_izq + 300, y, "Verificado por:")
+    can.drawString(x_izq + 400, y, nombre_2)
+    can.line(x_izq + 395, y - 2, x_izq + 550, y - 2)
+
+    y -= 70
+
+    # Firmas con recuadro
+    can.setFont("Helvetica", 10)
+    can.drawString(x_izq, y + 45, "Firma de quien rellena:")
+    can.rect(x_izq, y, 120, 40)
+
+    can.drawString(x_izq + 250, y + 45, "Firma de quien verifica:")
+    can.rect(x_izq + 250, y, 120, 40)
 
     # Etiqueta
     can.setFont("Helvetica-Bold", 8)
@@ -139,37 +178,6 @@ def crear_pdf():
     can.save()
     buffer.seek(0)
     return buffer
-
-# --- Insertar firmas sobre el PDF ---
-def insertar_firmas(pdf_bytes):
-    firma_buffer = BytesIO()
-    can = canvas.Canvas(firma_buffer, pagesize=letter)
-
-    for idx, firma_data in enumerate([firma1.image_data, firma2.image_data]):
-        if firma_data is not None:
-            firma_img = Image.fromarray(firma_data)
-            img_stream = BytesIO()
-            firma_img.save(img_stream, format="PNG")
-            img_stream.seek(0)
-
-            x = 150 if idx == 0 else 450
-            can.drawImage(ImageReader(img_stream), x, 440, width=100, height=40)
-
-    can.save()
-    firma_buffer.seek(0)
-
-    base_pdf = PdfReader(pdf_bytes)
-    firma_pdf = PdfReader(firma_buffer)
-    writer = PdfWriter()
-
-    page = base_pdf.pages[0]
-    page.merge_page(firma_pdf.pages[0])
-    writer.add_page(page)
-
-    final_output = BytesIO()
-    writer.write(final_output)
-    final_output.seek(0)
-    return final_output
 
 # --- Generar y mostrar PDF ---
 if enviado:
