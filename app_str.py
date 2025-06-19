@@ -90,8 +90,9 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
             firma_img.save(img_stream, format="PNG")
             img_stream.seek(0)
 
-            x = 60 if idx == 0 else 310
-            y = 100  # dentro del recuadro
+            # Ajustar posiciones para el nuevo diseño
+            x = 90 if idx == 0 else 340  # Centrar las firmas en cada columna
+            y = 140  # Posición vertical de las firmas
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
     can.save()
@@ -109,7 +110,6 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
     writer.write(final_output)
     final_output.seek(0)
     return final_output
-
 
 # --- Crear PDF desde cero ---
 def crear_pdf():
@@ -177,30 +177,41 @@ def crear_pdf():
     can.setFont("Helvetica-Bold", 12)
     can.drawString(x_izq, y, "TOTAL:")
     can.drawRightString(x_derecha, y, f"${total:,.0f}")
-    y -= 40
+    y -= 50
 
-    # Nombres
-        # Nombres centrados
+    # NUEVO DISEÑO DE FIRMAS Y NOMBRES EN COLUMNAS
+    # Definir posiciones para las dos columnas
+    col1_x = 90  # Centro de la primera columna
+    col2_x = 340  # Centro de la segunda columna
+    
+    # Recuadros para las firmas
+    firma_width = 120
+    firma_height = 40
+    firma_y = y - 40
+    
+    # Dibujar recuadros de firmas
+    can.rect(col1_x - firma_width/2, firma_y, firma_width, firma_height)  # Firma 1
+    can.rect(col2_x - firma_width/2, firma_y, firma_width, firma_height)  # Firma 2
+    
+    # Líneas para los nombres (debajo de las firmas)
+    linea_y = firma_y - 20
+    linea_width = 140
+    can.line(col1_x - linea_width/2, linea_y, col1_x + linea_width/2, linea_y)  # Línea 1
+    can.line(col2_x - linea_width/2, linea_y, col2_x + linea_width/2, linea_y)  # Línea 2
+    
+    # Nombres centrados sobre las líneas
     can.setFont("Helvetica", 10)
-    nombres_y = y  # guardar y para usarlo luego con firmas
-    texto_nombres = f"Rellenado por: {nombre_1}        Verificado por: {nombre_2}"
-    can.drawCentredString(300, y, texto_nombres)
+    nombre_y = linea_y + 5
+    can.drawCentredString(col1_x, nombre_y, nombre_1)
+    can.drawCentredString(col2_x, nombre_y, nombre_2)
+    
+    # Etiquetas en negrita debajo de las líneas
+    can.setFont("Helvetica-Bold", 9)
+    etiqueta_y = linea_y - 15
+    can.drawCentredString(col1_x, etiqueta_y, "Rellenado por")
+    can.drawCentredString(col2_x, etiqueta_y, "Verificado por")
 
-    # Líneas debajo de los nombres (centradas también)
-    can.line(120, y - 2, 250, y - 2)  # debajo de "Rellenado por"
-    can.line(360, y - 2, 490, y - 2)  # debajo de "Verificado por"
-    y -= 60
-
-
-    # Firmas
-    can.setFont("Helvetica", 10)
-    can.drawString(x_izq, y + 45, "Firma de quien rellena:")
-    can.rect(x_izq, y, 120, 40)
-
-    can.drawString(x_izq + 250, y + 45, "Firma de quien verifica:")
-    can.rect(x_izq + 250, y, 120, 40)
-
-    # Etiqueta
+    # Etiqueta del formulario
     can.setFont("Helvetica-Bold", 8)
     can.drawString(260, 30, "S-24-S 5/21")
 
