@@ -90,8 +90,8 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
             firma_img.save(img_stream, format="PNG")
             img_stream.seek(0)
 
-            # Ajustar posiciones para el nuevo diseño
-            x = 90 if idx == 0 else 340  # Centrar las firmas en cada columna
+            # Ajustar posiciones para centrar las firmas correctamente
+            x = 186 if idx == 0 else 426  # Centrar las firmas en cada columna
             y = 140  # Posición vertical de las firmas
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
@@ -180,21 +180,22 @@ def crear_pdf():
     y -= 50
 
     # NUEVO DISEÑO DE FIRMAS Y NOMBRES EN COLUMNAS
-    # Definir posiciones para las dos columnas
-    col1_x = 90  # Centro de la primera columna
-    col2_x = 340  # Centro de la segunda columna
+    # Centrar las columnas respecto al ancho total del PDF (612 puntos)
+    centro_pdf = 306  # Mitad de 612 (ancho de letter)
+    separacion = 120  # Separación entre columnas
+    col1_x = centro_pdf - separacion  # Primera columna
+    col2_x = centro_pdf + separacion  # Segunda columna
     
-    # Recuadros para las firmas
+    # Configuración de firmas
     firma_width = 120
     firma_height = 40
     firma_y = y - 40
     
-    # Dibujar recuadros de firmas
-    can.rect(col1_x - firma_width/2, firma_y, firma_width, firma_height)  # Firma 1
-    can.rect(col2_x - firma_width/2, firma_y, firma_width, firma_height)  # Firma 2
+    # Espacio para las firmas (SIN recuadros)
+    # Las firmas se insertan directamente en este espacio
     
-    # Líneas para los nombres (debajo de las firmas)
-    linea_y = firma_y - 20
+    # Líneas para los nombres (debajo del espacio de firmas)
+    linea_y = firma_y - 10
     linea_width = 140
     can.line(col1_x - linea_width/2, linea_y, col1_x + linea_width/2, linea_y)  # Línea 1
     can.line(col2_x - linea_width/2, linea_y, col2_x + linea_width/2, linea_y)  # Línea 2
