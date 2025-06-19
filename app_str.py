@@ -79,7 +79,7 @@ with st.form("formulario"):
     enviado = st.form_submit_button("📤 Generar PDF")
 
 # --- Insertar firmas ---
-def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
+def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
     firma_buffer = BytesIO()
     can = canvas.Canvas(firma_buffer, pagesize=letter)
 
@@ -92,7 +92,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
 
             # Ajustar posiciones para centrar las firmas correctamente
             x = 186 if idx == 0 else 426  # Centrar las firmas en cada columna
-            y = 140  # Posición vertical de las firmas
+            y = firma_y_pos + 5  # Posicionar las firmas justo encima de las líneas de nombres
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
     can.save()
@@ -218,12 +218,12 @@ def crear_pdf():
 
     can.save()
     buffer.seek(0)
-    return buffer
+    return buffer, firma_y  # Devolver también la posición Y de las firmas
 
 # --- Generar y mostrar PDF ---
 if enviado:
-    pdf_base = crear_pdf()
-    pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data)
+    pdf_base, firma_y_position = crear_pdf()
+    pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
     nombre_archivo = f"{fecha_str} - {tipo}.pdf"
 
     b64_pdf = base64.b64encode(pdf_final.getvalue()).decode("utf-8")
