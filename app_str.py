@@ -91,7 +91,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             img_stream.seek(0)
 
             # Ajustar posiciones para centrar las firmas correctamente
-            x = 186 if idx == 0 else 426  # Centrar las firmas en cada columna
+            x = (186-10) if idx == 0 else (426-10)  # Centrar las firmas en cada columna
             y = firma_y_pos + 5  # Posicionar las firmas justo encima de las líneas de nombres
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
