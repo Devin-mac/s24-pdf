@@ -57,8 +57,8 @@ with st.form("formulario"):
     st.markdown("**Firma de quien rellena:**")
     firma1 = st_canvas(
         key="firma1",
-        height=100,
-        width=300,
+        height=300,
+        width=900,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -68,8 +68,8 @@ with st.form("formulario"):
     st.markdown("**Firma de quien verifica:**")
     firma2 = st_canvas(
         key="firma2",
-        height=100,
-        width=300,
+        height=300,
+        width=900,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
