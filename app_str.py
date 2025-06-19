@@ -179,10 +179,45 @@ def crear_pdf():
     buffer.seek(0)
     return buffer
 
+
+# --- Insertar firmas sobre el PDF ---
+def insertar_firmas(pdf_bytes, firma1_data, firma2_data):
+    firma_buffer = BytesIO()
+    can = canvas.Canvas(firma_buffer, pagesize=letter)
+
+    for idx, firma_data in enumerate([firma1_data, firma2_data]):
+        if firma_data is not None:
+            firma_img = Image.fromarray(firma_data)
+            img_stream = BytesIO()
+            firma_img.save(img_stream, format="PNG")
+            img_stream.seek(0)
+
+            x = 60 if idx == 0 else 310  # Posiciones para firmas
+            can.drawImage(ImageReader(img_stream), x, 150, width=120, height=40)
+
+    can.save()
+    firma_buffer.seek(0)
+
+    base_pdf = PdfReader(pdf_bytes)
+    firma_pdf = PdfReader(firma_buffer)
+    writer = PdfWriter()
+
+    page = base_pdf.pages[0]
+    page.merge_page(firma_pdf.pages[0])
+    writer.add_page(page)
+
+    final_output = BytesIO()
+    writer.write(final_output)
+    final_output.seek(0)
+    return final_output
+
+
+
+
 # --- Generar y mostrar PDF ---
 if enviado:
     pdf_base = crear_pdf()
-    pdf_final = insertar_firmas(pdf_base)
+    pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data)
     nombre_archivo = f"{fecha_str} - {tipo}.pdf"
 
     # Mostrar vista previa
