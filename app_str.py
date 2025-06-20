@@ -123,7 +123,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 150 if idx == 0 else 470
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=206, height=60)
+            can.drawImage(ImageReader(img_stream), x, y, width=226, height=60)
 
     can.save()
     firma_buffer.seek(0)
