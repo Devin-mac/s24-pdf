@@ -78,6 +78,22 @@ with st.form("formulario"):
 
     enviado = st.form_submit_button("📤 Generar PDF")
 
+# --- Función para dibujar checkbox cuadrado con X ---
+def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=12):
+    """
+    Dibuja un checkbox como cuadrado con X si está marcado
+    """
+    # Dibujar el cuadrado
+    canvas.rect(x, y, size, size, stroke=1, fill=0)
+    
+    # Si está marcado, dibujar la X
+    if marcado:
+        canvas.setFont("Helvetica-Bold", size-2)
+        # Centrar la X en el cuadrado
+        x_center = x + size/2 - 3
+        y_center = y + 2
+        canvas.drawString(x_center, y_center, "X")
+
 # --- Insertar firmas ---
 def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
     firma_buffer = BytesIO()
@@ -127,51 +143,64 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
 # --- Crear PDF desde cero ---
 def crear_pdf():
     buffer = BytesIO()
-    can = canvas.Canvas(buffer, pagesize=landscape(letter))  # CAMBIO 2: Orientación horizontal
+    can = canvas.Canvas(buffer, pagesize=landscape(letter))
 
-    x_izq = 90
-    x_derecha = 700  # CAMBIO 2: Ajuste para orientación horizontal (792-60)
-    y = 550  # CAMBIO 2: Ajuste altura inicial para horizontal
+    # Posiciones originales (SIN sangría para título y primera sección)
+    x_izq_original = 90
+    x_derecha_original = 700
+    y = 550
 
-    # Título centrado
-    can.setFont("Helvetica-Bold", 20)
-    can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")  # CAMBIO 2: Centro horizontal (792/2)
+    # Título centrado (sin sangría)
+    can.setFont("Helvetica-Bold", 26)
+    can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")
     y -= 40
 
-    # Línea con "Seleccione el tipo de transacción" y "Fecha"
-    can.setFont("Helvetica-Bold", 16)
-    can.drawString(x_izq, y, "Seleccione el tipo de transacción:")
+    # Línea SIN sangrías
+    can.setFont("Helvetica-Bold", 18)
+    can.drawString(x_izq_original, y, "Seleccione el tipo de transacción:")
     
     # Fecha a la derecha con línea
     fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
-    can.drawRightString(x_derecha, y, fecha_text)
+    can.drawRightString(x_derecha_original, y, fecha_text)
     y -= 25
 
-    # Tipos de transacción en 2 columnas
-    can.setFont("Helvetica", 14)
+    # Sangrías de 1cm (28.35 puntos) SOLO para checkboxes y contenido siguiente
+    sangria = 28.35  # 1cm en puntos
+    x_izq = x_izq_original + sangria  # Posición original + sangría
+    x_derecha = x_derecha_original - sangria  # Posición original - sangría
+
+    # Tipos de transacción con checkboxes cuadrados Y sangrías
+    can.setFont("Helvetica", 18)
     
-    # Columna izquierda
-    col_izq_x = x_izq
-    col_der_x = 396  # CAMBIO 2: Centro de la página horizontal
+    # Columna izquierda y derecha con sangrías
+    col_izq_x = x_izq + 20  # Espacio adicional para los checkboxes
+    col_der_x = 396  # Centro de la página horizontal
+    checkbox_size = 12
     
     # Fila 1
-    marca_donacion = "X" if tipo == "DONACIÓN" else " "
-    marca_pago = "X" if tipo == "PAGO" else " "
-    can.drawString(col_izq_x, y, f"[ {marca_donacion} ] Donación")
-    can.drawString(col_der_x, y, f"[ {marca_pago} ] Pago")
+    # Checkbox izquierdo - Donación
+    dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
+    can.drawString(col_izq_x, y, "Donación")
+    
+    # Checkbox derecho - Pago
+    dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
+    can.drawString(col_der_x + 20, y, "Pago")
     y -= 15
     
     # Fila 2
-    marca_deposito = "X" if tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO" else " "
-    marca_adelanto = "X" if tipo == "ADELANTO DE EFECTIVO" else " "
-    can.drawString(col_izq_x, y, f"[ {marca_deposito} ] Depósito en la caja de efectivo")
-    can.drawString(col_der_x, y, f"[ {marca_adelanto} ] Adelanto de efectivo")
+    # Checkbox izquierdo - Depósito
+    dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO", checkbox_size)
+    can.drawString(col_izq_x, y, "Depósito en la caja de efectivo")
+    
+    # Checkbox derecho - Adelanto
+    dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "ADELANTO DE EFECTIVO", checkbox_size)
+    can.drawString(col_der_x + 20, y, "Adelanto de efectivo")
     y -= 30
 
-    # Sección de donaciones y conceptos
-    can.setFont("Helvetica", 16)
+    # Sección de donaciones y conceptos CON sangrías
+    can.setFont("Helvetica", 18)
     
-    # Donaciones (Obra mundial)
+    # Donaciones (Obra mundial) CON sangría
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
     if don_obra > 0:
         can.drawRightString(x_derecha, y, f"{don_obra:,}")
@@ -179,7 +208,7 @@ def crear_pdf():
         can.drawRightString(x_derecha, y, "_______________")
     y -= 15
 
-    # Donaciones (Gastos de la congregación)
+    # Donaciones (Gastos de la congregación) CON sangría
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
     if don_congre > 0:
         can.drawRightString(x_derecha, y, f"{don_congre:,}")
@@ -187,7 +216,7 @@ def crear_pdf():
         can.drawRightString(x_derecha, y, "_______________")
     y -= 15
 
-    # Concepto adicional si existe
+    # Concepto adicional si existe CON sangría
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
@@ -196,17 +225,19 @@ def crear_pdf():
             can.drawRightString(x_derecha, y, "_______________")
         y -= 15
 
-    # Líneas adicionales en blanco (3 líneas como en el diseño)
+    # Líneas adicionales en blanco CON sangrías
     lineas_extra = 3 if not concepto else 2
     for i in range(lineas_extra):
-        can.drawString(x_izq, y, "_" * 45)
+        # Calcular el ancho de la línea considerando las sangrías
+        ancho_linea = int((x_derecha - x_izq - 150) / 8)
+        can.drawString(x_izq, y, "_" * ancho_linea)
         can.drawRightString(x_derecha, y, "_______________")
         y -= 15
 
     y -= 10
 
-    # Total
-    can.setFont("Helvetica-Bold", 18)
+    # TOTAL CON sangría derecha
+    can.setFont("Helvetica-Bold", 22)
     can.drawRightString(x_derecha - 100, y, "TOTAL:")
     if total > 0:
         can.drawRightString(x_derecha, y, f"{total:,}")
@@ -214,8 +245,7 @@ def crear_pdf():
         can.drawRightString(x_derecha, y, "_______________")
     y -= 60
 
-    # Sección de firmas
-    # Posiciones centradas para las firmas - CAMBIO 2: Ajustadas para horizontal
+    # Sección de firmas (sin modificación, ya están centradas)
     firma1_x = 240
     firma2_x = 550
     firma_y = y - 40
@@ -227,7 +257,7 @@ def crear_pdf():
     can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
     
     # Nombres sobre las líneas
-    can.setFont("Helvetica", 12)
+    can.setFont("Helvetica", 14)
     if nombre_1:
         can.drawCentredString(firma1_x, linea_y + 5, nombre_1)
     if nombre_2:
@@ -238,14 +268,15 @@ def crear_pdf():
     can.drawCentredString(firma1_x, linea_y - 15, "(Rellenado por)")
     can.drawCentredString(firma2_x, linea_y - 15, "(Verificado por)")
 
-    # Código del formulario - CAMBIO 3: Dos líneas después de "Rellenado por"
+    # Código del formulario
     can.setFont("Helvetica-Bold", 10)
-    codigo_y = linea_y - 15 - 20  # Dos líneas después de "(Rellenado por)"
+    codigo_y = linea_y - 15 - 20
     can.drawString(90, codigo_y, "S-24-S  5/21")
 
     can.save()
     buffer.seek(0)
     return buffer, firma_y
+
 
 # --- Generar y mostrar PDF ---
 if enviado:
