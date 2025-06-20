@@ -313,38 +313,23 @@ if enviado:
         # Crear PDF base
         pdf_base, firma_y_position = crear_pdf()
 
-        # Insertar firmas si hay datos válidos
+        # Insertar firmas si están disponibles
         if firma1.image_data is not None and firma2.image_data is not None:
             pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
         else:
             st.warning("⚠️ Al menos una firma está vacía. El PDF se generará sin firmas.")
             pdf_final = pdf_base
 
-        # Verificar tamaño del PDF generado
+        # Verificar que el PDF tenga contenido
         pdf_bytes = pdf_final.getvalue()
-        st.write("Tamaño PDF final:", len(pdf_bytes))
-
         if pdf_bytes:
-            try:
-                b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-                pdf_viewer = f'''
-                    <iframe 
-                        src="data:application/pdf;base64,{b64_pdf}" 
-                        width="100%" 
-                        height="500" 
-                        type="application/pdf">
-                    </iframe>
-                '''
-                st.success("✅ Vista previa del PDF generada:")
-                components.html(pdf_viewer, height=510, scrolling=True)  # <--- sin unsafe_allow_html
-            except Exception as e:
-                st.error(f"❌ Error al generar la vista previa en base64: {e}")
-
-
-        # Botón de descarga
-        nombre_archivo = f"{fecha_str} - {tipo}.pdf"
-        st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
+            nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+            st.success("✅ PDF generado exitosamente. Puedes descargarlo a continuación:")
+            st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
+        else:
+            st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
 
     except Exception as e:
         st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
+
 
