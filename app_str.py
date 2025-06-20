@@ -325,7 +325,6 @@ if enviado:
         st.write("Tamaño PDF final:", len(pdf_bytes))
 
         if pdf_bytes:
-            # Codificar en base64 para vista previa
             try:
                 b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
                 pdf_viewer = f'''
@@ -337,11 +336,10 @@ if enviado:
                     </iframe>
                 '''
                 st.success("✅ Vista previa del PDF generada:")
-                components.html(pdf_viewer, height=510, scrolling=True, unsafe_allow_html=True)
+                components.html(pdf_viewer, height=510, scrolling=True)  # <--- sin unsafe_allow_html
             except Exception as e:
                 st.error(f"❌ Error al generar la vista previa en base64: {e}")
-        else:
-            st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
+
 
         # Botón de descarga
         nombre_archivo = f"{fecha_str} - {tipo}.pdf"
