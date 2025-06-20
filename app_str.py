@@ -310,24 +310,23 @@ def crear_pdf():
 # --- Generar y mostrar PDF ---
 if enviado:
     try:
-        # Crear PDF base
-        pdf_base, firma_y_position = crear_pdf()
+        # Validar firmas antes de generar
+        if firma1.image_data is None or firma2.image_data is None:
+            st.error("❌ Ambas firmas son obligatorias para generar el PDF.")
+        else:
+            # Crear PDF base
+            pdf_base, firma_y_position = crear_pdf()
 
-        # Insertar firmas si están disponibles
-        if firma1.image_data is not None and firma2.image_data is not None:
+            # Insertar firmas
             pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
-        else:
-            st.warning("⚠️ Al menos una firma está vacía. El PDF se generará sin firmas.")
-            pdf_final = pdf_base
 
-        # Verificar que el PDF tenga contenido
-        pdf_bytes = pdf_final.getvalue()
-        if pdf_bytes:
-            nombre_archivo = f"{fecha_str} - {tipo}.pdf"
-            st.success("✅ PDF generado exitosamente. Puedes descargarlo a continuación:")
-            st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
-        else:
-            st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
+            # Verificar que el PDF tenga contenido
+            pdf_bytes = pdf_final.getvalue()
+            if pdf_bytes:
+                nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+                st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
+            else:
+                st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
 
     except Exception as e:
         st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
