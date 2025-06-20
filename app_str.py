@@ -207,17 +207,21 @@ def crear_pdf():
     
     # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
+    can.setFont("Helvetica", 18)
     can.drawString(col_izq_x, y, "Donación")
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
+    can.setFont("Helvetica", 18)
     can.drawString(col_der_x + 20, y, "Pago")
     y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
     
     # Fila 2 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO", checkbox_size)
+    can.setFont("Helvetica", 18)
     can.drawString(col_izq_x, y, "Depósito en la caja de efectivo")
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "ADELANTO DE EFECTIVO", checkbox_size)
+    can.setFont("Helvetica", 18)
     can.drawString(col_der_x + 20, y, "Adelanto de efectivo")
     y -= 45  # Aumentado de 30 a 45 (50% más)
 
