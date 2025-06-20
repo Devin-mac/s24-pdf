@@ -59,7 +59,7 @@ with st.form("formulario"):
     firma1 = st_canvas(
         key="firma1",
         height=300,
-        width=900,
+        width=800,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -70,7 +70,7 @@ with st.form("formulario"):
     firma2 = st_canvas(
         key="firma2",
         height=300,
-        width=900,
+        width=800,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -80,7 +80,7 @@ with st.form("formulario"):
     enviado = st.form_submit_button("📤 Generar PDF")
 
 # --- Función para dibujar checkbox cuadrado con X ---
-def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=13):
+def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=14):
     """
     Dibuja un checkbox como cuadrado con X si está marcado
     """
@@ -121,7 +121,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             img_stream.seek(0)
 
             # Ajustar posiciones para orientación horizontal
-            x = 190 if idx == 0 else 490
+            x = 170 if idx == 0 else 490
             y = firma_y_pos + 5
             can.drawImage(ImageReader(img_stream), x, y, width=186, height=60)
 
