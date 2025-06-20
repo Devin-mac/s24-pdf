@@ -59,7 +59,7 @@ with st.form("formulario"):
     firma1 = st_canvas(
         key="firma1",
         height=300,
-        width=800,
+        width=700,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -70,7 +70,7 @@ with st.form("formulario"):
     firma2 = st_canvas(
         key="firma2",
         height=300,
-        width=800,
+        width=700,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -123,7 +123,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 170 if idx == 0 else 490
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=186, height=60)
+            can.drawImage(ImageReader(img_stream), x, y, width=206, height=60)
 
     can.save()
     firma_buffer.seek(0)
