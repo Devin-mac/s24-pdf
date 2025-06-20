@@ -110,7 +110,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             mascara_firma = np.all(firma_array[:, :, :3] == [0, 0, 0], axis=-1)
             # Hacer la firma más gruesa (dilatación simple)
             from scipy import ndimage
-            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=4)
+            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=6)
             # Aplicar color azul a la firma gruesa
             firma_array[mascara_gruesa] = [0, 0, 255, 255]  # Azul
             firma_img_azul = Image.fromarray(firma_array)
