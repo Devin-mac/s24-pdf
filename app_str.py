@@ -146,9 +146,9 @@ def crear_pdf():
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
 
-    # Posiciones originales (SIN sangría para título y primera sección)
-    x_izq_original = 90
-    x_derecha_original = 700
+    # Posiciones base
+    x_base_izq = 90
+    x_base_der = 700
     y = 550
 
     # Título centrado (sin sangría)
@@ -156,97 +156,94 @@ def crear_pdf():
     can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")
     y -= 40
 
-    # Línea SIN sangrías
+    # Línea de selección (sin sangría)
     can.setFont("Helvetica-Bold", 18)
-    can.drawString(x_izq_original, y, "Seleccione el tipo de transacción:")
+    can.drawString(x_base_izq, y, "Seleccione el tipo de transacción:")
     
-    # Fecha a la derecha con línea
+    # Fecha a la derecha
     fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
-    can.drawRightString(x_derecha_original, y, fecha_text)
+    can.drawRightString(x_base_der, y, fecha_text)
     y -= 25
 
-    # Sangrías de 1cm (28.35 puntos) SOLO para checkboxes y contenido siguiente
+    # APLICAR SANGRÍAS A PARTIR DE AQUÍ
     sangria = 28.35  # 1cm en puntos
-    x_izq = x_izq_original + sangria  # Posición original + sangría
-    x_derecha = x_derecha_original - sangria  # Posición original - sangría
+    x_izq = x_base_izq + sangria
+    x_der = x_base_der - sangria
 
-    # Tipos de transacción con checkboxes cuadrados Y sangrías
+    # Checkboxes con sangrías aplicadas
     can.setFont("Helvetica", 18)
-    
-    # Columna izquierda y derecha con sangrías
-    col_izq_x = x_izq + 20  # Espacio adicional para los checkboxes
-    col_der_x = 396  # Centro de la página horizontal
+    col_izq_x = x_izq + 20  # Posición del texto después del checkbox
+    col_der_x = 396  # Centro para segunda columna
     checkbox_size = 12
     
-    # Fila 1
-    # Checkbox izquierdo - Donación
+    # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
     can.drawString(col_izq_x, y, "Donación")
     
-    # Checkbox derecho - Pago
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
     can.drawString(col_der_x + 20, y, "Pago")
     y -= 15
     
-    # Fila 2
-    # Checkbox izquierdo - Depósito
+    # Fila 2 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO", checkbox_size)
     can.drawString(col_izq_x, y, "Depósito en la caja de efectivo")
     
-    # Checkbox derecho - Adelanto
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "ADELANTO DE EFECTIVO", checkbox_size)
     can.drawString(col_der_x + 20, y, "Adelanto de efectivo")
     y -= 30
 
-    # Sección de donaciones y conceptos CON sangrías
+    # TODAS LAS SECCIONES SIGUIENTES CON SANGRÍAS CONSISTENTES
     can.setFont("Helvetica", 18)
     
-    # Donaciones (Obra mundial) CON sangría
+    # Donaciones (Obra mundial) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
     if don_obra > 0:
-        can.drawRightString(x_derecha, y, f"{don_obra:,}")
+        can.drawRightString(x_der, y, f"{don_obra:,}")
     else:
-        can.drawRightString(x_derecha, y, "_______________")
+        can.drawRightString(x_der, y, "_______________")
     y -= 15
 
-    # Donaciones (Gastos de la congregación) CON sangría
+    # Donaciones (Gastos de la congregación) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
     if don_congre > 0:
-        can.drawRightString(x_derecha, y, f"{don_congre:,}")
+        can.drawRightString(x_der, y, f"{don_congre:,}")
     else:
-        can.drawRightString(x_derecha, y, "_______________")
+        can.drawRightString(x_der, y, "_______________")
     y -= 15
 
-    # Concepto adicional si existe CON sangría
+    # Concepto adicional - CON SANGRÍA
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
-            can.drawRightString(x_derecha, y, f"{valor_concepto:,}")
+            can.drawRightString(x_der, y, f"{valor_concepto:,}")
         else:
-            can.drawRightString(x_derecha, y, "_______________")
+            can.drawRightString(x_der, y, "_______________")
         y -= 15
 
-    # Líneas adicionales en blanco CON sangrías
+    # Líneas adicionales en blanco - CON SANGRÍAS
     lineas_extra = 3 if not concepto else 2
     for i in range(lineas_extra):
-        # Calcular el ancho de la línea considerando las sangrías
-        ancho_linea = int((x_derecha - x_izq - 150) / 8)
+        # Calcular líneas considerando las sangrías
+        ancho_linea = int((x_der - x_izq - 150) / 8)
         can.drawString(x_izq, y, "_" * ancho_linea)
-        can.drawRightString(x_derecha, y, "_______________")
+        can.drawRightString(x_der, y, "_______________")
         y -= 15
 
     y -= 10
 
-    # TOTAL CON sangría derecha
+    # TOTAL - CON SANGRÍA DERECHA
     can.setFont("Helvetica-Bold", 22)
-    can.drawRightString(x_derecha - 100, y, "TOTAL:")
+    can.drawRightString(x_der - 100, y, "TOTAL:")
     if total > 0:
-        can.drawRightString(x_derecha, y, f"{total:,}")
+        can.drawRightString(x_der, y, f"{total:,}")
     else:
-        can.drawRightString(x_derecha, y, "_______________")
+        can.drawRightString(x_der, y, "_______________")
     y -= 60
 
-    # Sección de firmas (sin modificación, ya están centradas)
+    # Resto del código permanece igual...
+    # (sección de firmas, etc.)
+    
+    # Sección de firmas (centradas, sin sangría)
     firma1_x = 240
     firma2_x = 550
     firma_y = y - 40
