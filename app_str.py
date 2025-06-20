@@ -200,14 +200,14 @@ def crear_pdf():
     x_inicio_lineas = x_der - longitud_linea_valores
 
     # Checkboxes con sangrías aplicadas
-    can.setFont("Helvetica", 22)
+    #can.setFont("Helvetica", 22)
     col_izq_x = x_izq + 20
     col_der_x = 396
     checkbox_size = 12
     
     # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
-    can.setFont("Helvetica", 24)
+    can.setFont("Helvetica", 20)
     can.drawString(col_izq_x, y, "Donación")
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
