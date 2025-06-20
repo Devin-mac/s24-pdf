@@ -122,7 +122,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 190 if idx == 0 else 490
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
+            can.drawImage(ImageReader(img_stream), x, y, width=156, height=40)
 
     can.save()
     firma_buffer.seek(0)
@@ -164,6 +164,7 @@ def crear_pdf():
     
     # Fecha a la derecha
     fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
+    can.setFont("Helvetica", 18)  # Quitar la negrita
     can.drawRightString(x_base_der, y, fecha_text)
     y -= espaciado_lineas  # Cambiado de 25 a espaciado_lineas
 
@@ -204,18 +205,12 @@ def crear_pdf():
     
     # Donaciones (Obra mundial) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
-    if don_obra > 0:
-        can.drawRightString(x_der, y, f"{don_obra:,}")
-    else:
-        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+    can.drawRightString(x_der, y, f"{don_obra:,.2f}".replace(",", "#").replace(".", ",").replace("#", "."))
     y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Donaciones (Gastos de la congregación) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
-    if don_congre > 0:
-        can.drawRightString(x_der, y, f"{don_congre:,}")
-    else:
-        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+    can.drawRightString(x_der, y, f"{don_congre:,.2f}".replace(",", "#").replace(".", ",").replace("#", "."))
     y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Concepto adicional - CON SANGRÍA
@@ -264,7 +259,7 @@ def crear_pdf():
     firma_y = y - 40
     
     # Líneas para firmas
-    linea_width = 120
+    linea_width = 156
     linea_y = firma_y - 10
     can.line(firma1_x - linea_width/2, linea_y, firma1_x + linea_width/2, linea_y)
     can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
