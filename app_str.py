@@ -16,27 +16,114 @@ st.set_page_config(page_title="Formulario S-24", layout="centered")
 st.title("📄 Generador de PDF - Registro de Transacción S-24")
 
 # --- Fecha con calendario ---
+# --- Fecha con calendario tipo tablero ---
 st.subheader("📆 Fecha de transacción")
 
-# Widget de calendario que por defecto muestra la fecha actual
-fecha_seleccionada = st.date_input(
-    "Selecciona la fecha",
-    value=date.today(),  # Fecha por defecto: hoy
-    min_value=date(2020, 1, 1),  # Fecha mínima
-    max_value=date(2030, 12, 31),  # Fecha máxima
-    format="DD/MM/YYYY"  # Formato de visualización
-)
+import calendar as cal
 
-# Convertir la fecha al formato que necesitas (día mes año en español)
+# Meses en español
 meses_espanol = [
     "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
     "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
 ]
 
-fecha_str = f"{fecha_seleccionada.day:02d} {meses_espanol[fecha_seleccionada.month - 1]} {fecha_seleccionada.year}"
+# Selectores de mes y año
+col_mes, col_anio = st.columns(2)
 
-# Opcional: mostrar la fecha formateada
-st.write(f"**Fecha seleccionada:** {fecha_str}")
+with col_mes:
+    mes_seleccionado = st.selectbox(
+        "Mes", 
+        options=list(range(1, 13)),
+        format_func=lambda x: meses_espanol[x-1],
+        index=date.today().month - 1
+    )
+
+with col_anio:
+    anio_seleccionado = st.selectbox(
+        "Año",
+        options=list(range(2020, 2031)),
+        index=list(range(2020, 2031)).index(date.today().year)
+    )
+
+# Mostrar el calendario del mes seleccionado
+st.markdown(f"**📅 Selecciona el día de {meses_espanol[mes_seleccionado-1]} {anio_seleccionado}:**")
+
+# Obtener información del mes
+dias_en_mes = cal.monthrange(anio_seleccionado, mes_seleccionado)[1]
+primer_dia_semana = cal.monthrange(anio_seleccionado, mes_seleccionado)[0]
+
+# Encabezados de días de la semana
+dias_semana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+
+# CSS para mejorar la apariencia de los botones
+st.markdown("""
+<style>
+div.stButton > button {
+    width: 100%;
+    height: 45px;
+    font-size: 16px;
+    font-weight: bold;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Encabezados
+cols_header = st.columns(7)
+for i, dia_sem in enumerate(dias_semana):
+    with cols_header[i]:
+        st.markdown(f"<div style='text-align: center; font-weight: bold; padding: 5px;'>{dia_sem}</div>", unsafe_allow_html=True)
+
+# Inicializar la variable para el día seleccionado
+dia_seleccionado = st.session_state.get('dia_seleccionado', date.today().day if mes_seleccionado == date.today().month and anio_seleccionado == date.today().year else 1)
+
+# Crear las filas del calendario
+semana = 0
+dia_actual = 1
+espacios_iniciales = (primer_dia_semana + 1) % 7
+
+while dia_actual <= dias_en_mes:
+    cols_dias = st.columns(7)
+    
+    for i in range(7):
+        with cols_dias[i]:
+            if semana == 0 and i < espacios_iniciales:
+                # Espacios vacíos antes del primer día
+                st.write("")
+            elif dia_actual <= dias_en_mes:
+                # Determinar el tipo de botón según si está seleccionado
+                if dia_actual == dia_seleccionado:
+                    button_type = "primary"
+                else:
+                    button_type = "secondary"
+                
+                # Botón para el día
+                if st.button(f"{dia_actual}", key=f"dia_{dia_actual}", type=button_type):
+                    st.session_state.dia_seleccionado = dia_actual
+                    dia_seleccionado = dia_actual
+                    st.rerun()
+                
+                dia_actual += 1
+    
+    semana += 1
+    if dia_actual > dias_en_mes:
+        break
+
+# Crear la fecha formateada
+fecha_str = f"{dia_seleccionado:02d} {meses_espanol[mes_seleccionado-1]} {anio_seleccionado}"
+
+# Mostrar fecha seleccionada
+st.success(f"✅ **Fecha seleccionada:** {fecha_str}")
+
+# Limpiar selección anterior cuando cambia mes o año
+if 'mes_anterior' not in st.session_state:
+    st.session_state.mes_anterior = mes_seleccionado
+if 'anio_anterior' not in st.session_state:
+    st.session_state.anio_anterior = anio_seleccionado
+
+if st.session_state.mes_anterior != mes_seleccionado or st.session_state.anio_anterior != anio_seleccionado:
+    st.session_state.dia_seleccionado = 1
+    st.session_state.mes_anterior = mes_seleccionado
+    st.session_state.anio_anterior = anio_seleccionado
 
 # --- Formulario de datos ---
 with st.form("formulario"):
