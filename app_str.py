@@ -48,7 +48,7 @@ with st.form("formulario"):
     valor_concepto = st.number_input("Valor del concepto", min_value=0, value=0)
 
     total = sum(v for v in [don_obra, don_congre, valor_concepto] if v is not None)
-    st.markdown(f"**TOTAL: ${total:,.0f} COP**")
+    st.markdown(f"**TOTAL: ${total:,} COP**")
 
     nombre_1 = st.text_input("Nombre de quien rellena")
     nombre_2 = st.text_input("Nombre de quien verifica")
@@ -94,7 +94,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             mascara_firma = np.all(firma_array[:, :, :3] == [0, 0, 0], axis=-1)
             # Hacer la firma más gruesa (dilatación simple)
             from scipy import ndimage
-            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=2)
+            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=4)
             # Aplicar color azul a la firma gruesa
             firma_array[mascara_gruesa] = [0, 0, 255, 255]  # Azul
             firma_img_azul = Image.fromarray(firma_array)
@@ -104,7 +104,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             img_stream.seek(0)
 
             # Ajustar posiciones para orientación horizontal
-            x = 180 if idx == 0 else 480  # Posiciones ajustadas para horizontal
+            x = 190 if idx == 0 else 490  # Posiciones ajustadas para horizontal
             y = firma_y_pos + 5  # Posicionar las firmas justo encima de las líneas de nombres
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
@@ -129,17 +129,17 @@ def crear_pdf():
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))  # CAMBIO 2: Orientación horizontal
 
-    x_izq = 60
-    x_derecha = 730  # CAMBIO 2: Ajuste para orientación horizontal (792-60)
+    x_izq = 90
+    x_derecha = 700  # CAMBIO 2: Ajuste para orientación horizontal (792-60)
     y = 550  # CAMBIO 2: Ajuste altura inicial para horizontal
 
     # Título centrado
-    can.setFont("Helvetica-Bold", 14)
+    can.setFont("Helvetica-Bold", 16)
     can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")  # CAMBIO 2: Centro horizontal (792/2)
     y -= 40
 
     # Línea con "Seleccione el tipo de transacción" y "Fecha"
-    can.setFont("Helvetica-Bold", 10)
+    can.setFont("Helvetica-Bold", 12)
     can.drawString(x_izq, y, "Seleccione el tipo de transacción:")
     
     # Fecha a la derecha con línea
@@ -148,7 +148,7 @@ def crear_pdf():
     y -= 25
 
     # Tipos de transacción en 2 columnas
-    can.setFont("Helvetica", 10)
+    can.setFont("Helvetica", 12)
     
     # Columna izquierda
     col_izq_x = x_izq
@@ -169,12 +169,12 @@ def crear_pdf():
     y -= 30
 
     # Sección de donaciones y conceptos
-    can.setFont("Helvetica", 10)
+    can.setFont("Helvetica", 12)
     
     # Donaciones (Obra mundial)
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
     if don_obra > 0:
-        can.drawRightString(x_derecha, y, f"{don_obra:,.0f}")
+        can.drawRightString(x_derecha, y, f"{don_obra:,}")
     else:
         can.drawRightString(x_derecha, y, "_______________")
     y -= 15
@@ -182,7 +182,7 @@ def crear_pdf():
     # Donaciones (Gastos de la congregación)
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
     if don_congre > 0:
-        can.drawRightString(x_derecha, y, f"{don_congre:,.0f}")
+        can.drawRightString(x_derecha, y, f"{don_congre:,}")
     else:
         can.drawRightString(x_derecha, y, "_______________")
     y -= 15
@@ -191,7 +191,7 @@ def crear_pdf():
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
-            can.drawRightString(x_derecha, y, f"{valor_concepto:,.0f}")
+            can.drawRightString(x_derecha, y, f"{valor_concepto:,}")
         else:
             can.drawRightString(x_derecha, y, "_______________")
         y -= 15
@@ -206,10 +206,10 @@ def crear_pdf():
     y -= 10
 
     # Total
-    can.setFont("Helvetica-Bold", 12)
+    can.setFont("Helvetica-Bold", 14)
     can.drawRightString(x_derecha - 100, y, "TOTAL:")
     if total > 0:
-        can.drawRightString(x_derecha, y, f"{total:,.0f}")
+        can.drawRightString(x_derecha, y, f"{total:,}")
     else:
         can.drawRightString(x_derecha, y, "_______________")
     y -= 60
@@ -241,7 +241,7 @@ def crear_pdf():
     # Código del formulario - CAMBIO 3: Dos líneas después de "Rellenado por"
     can.setFont("Helvetica-Bold", 8)
     codigo_y = linea_y - 15 - 20  # Dos líneas después de "(Rellenado por)"
-    can.drawString(60, codigo_y, "S-24-S  5/21")
+    can.drawString(90, codigo_y, "S-24-S  5/21")
 
     can.save()
     buffer.seek(0)
