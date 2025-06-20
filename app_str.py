@@ -15,24 +15,28 @@ import platform
 st.set_page_config(page_title="Formulario S-24", layout="centered")
 st.title("📄 Generador de PDF - Registro de Transacción S-24")
 
-# --- Fecha manual (día, mes, año) ---
+# --- Fecha con calendario ---
 st.subheader("📆 Fecha de transacción")
-dias = list(range(1, 32))
-meses = [
+
+# Widget de calendario que por defecto muestra la fecha actual
+fecha_seleccionada = st.date_input(
+    "Selecciona la fecha",
+    value=date.today(),  # Fecha por defecto: hoy
+    min_value=date(2020, 1, 1),  # Fecha mínima
+    max_value=date(2030, 12, 31),  # Fecha máxima
+    format="DD/MM/YYYY"  # Formato de visualización
+)
+
+# Convertir la fecha al formato que necesitas (día mes año en español)
+meses_espanol = [
     "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
     "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
 ]
-anios = list(range(2020, 2031))
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    dia = st.selectbox("Día", dias, index=dias.index(date.today().day))
-with col2:
-    mes = st.selectbox("Mes", meses, index=date.today().month - 1)
-with col3:
-    anio = st.selectbox("Año", anios, index=anios.index(date.today().year))
+fecha_str = f"{fecha_seleccionada.day:02d} {meses_espanol[fecha_seleccionada.month - 1]} {fecha_seleccionada.year}"
 
-fecha_str = f"{dia:02d} {mes} {anio}"
+# Opcional: mostrar la fecha formateada
+st.write(f"**Fecha seleccionada:** {fecha_str}")
 
 # --- Formulario de datos ---
 with st.form("formulario"):
