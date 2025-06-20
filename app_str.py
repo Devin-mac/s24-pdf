@@ -282,7 +282,7 @@ def crear_pdf():
     firma_y = y - 40
     
     # Líneas para firmas
-    linea_width = 186
+    linea_width = 206
     linea_y = firma_y - 10
     can.line(firma1_x - linea_width/2, linea_y, firma1_x + linea_width/2, linea_y)
     can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
