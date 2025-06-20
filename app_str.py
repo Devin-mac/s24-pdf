@@ -207,7 +207,7 @@ def crear_pdf():
     
     # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
-    can.setFont("Helvetica", 20)
+    can.setFont("Helvetica", 18)
     can.drawString(col_izq_x, y, "Donación")
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
@@ -313,9 +313,18 @@ if enviado:
     pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
     nombre_archivo = f"{fecha_str} - {tipo}.pdf"
 
+    # Mostrar vista previa
     b64_pdf = base64.b64encode(pdf_final.getvalue()).decode("utf-8")
-    pdf_viewer = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="700" height="500" type="application/pdf"></iframe>'
+    pdf_viewer = f'''
+        <iframe 
+            src="data:application/pdf;base64,{b64_pdf}" 
+            width="100%" 
+            height="500" 
+            type="application/pdf">
+        </iframe>
+    '''
     st.success("✅ Vista previa del PDF generada:")
-    components.html(pdf_viewer, height=510)
+    components.html(pdf_viewer, height=510, scrolling=True, unsafe_allow_html=True)
 
+    # Botón de descarga
     st.download_button("📥 Descargar PDF", data=pdf_final, file_name=nombre_archivo, mime="application/pdf")
