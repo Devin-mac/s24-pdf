@@ -52,17 +52,19 @@ st.markdown(f"**📅 Selecciona el día de {meses_espanol[mes_seleccionado-1]} {
 dias_en_mes = cal.monthrange(anio_seleccionado, mes_seleccionado)[1]
 primer_dia_semana = cal.monthrange(anio_seleccionado, mes_seleccionado)[0]
 
-# Encabezados de días de la semana
+# Encabezados de días de la semana (Python: lunes=0, domingo=6)
 dias_semana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
-# CSS para mejorar la apariencia de los botones
+# CSS para mejorar la apariencia de los botones (reducido 50%)
 st.markdown("""
 <style>
 div.stButton > button {
     width: 100%;
-    height: 45px;
-    font-size: 16px;
+    height: 22px;
+    font-size: 12px;
     font-weight: bold;
+    padding: 0px;
+    margin: 1px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -79,7 +81,8 @@ dia_seleccionado = st.session_state.get('dia_seleccionado', date.today().day if 
 # Crear las filas del calendario
 semana = 0
 dia_actual = 1
-espacios_iniciales = (primer_dia_semana + 1) % 7
+# CORRECCIÓN: Python calendar tiene lunes=0, pero necesitamos ajustar para que domingo=0
+espacios_iniciales = primer_dia_semana + 1 if primer_dia_semana < 6 else 0
 
 while dia_actual <= dias_en_mes:
     cols_dias = st.columns(7)
