@@ -204,7 +204,7 @@ def crear_pdf():
     #can.setFont("Helvetica", 22)
     col_izq_x = x_izq + 20
     col_der_x = 396
-    checkbox_size = 12
+    checkbox_size = 14
     
     # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
@@ -243,7 +243,7 @@ def crear_pdf():
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
-            can.drawRightString(x_der, y, f"{valor_concepto:,}")
+            can.drawRightString(x_der, y, f"{valor_concepto:,.2f}")
         else:
             can.line(x_inicio_lineas, y + 2, x_der, y + 2)
         y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
