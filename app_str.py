@@ -146,7 +146,7 @@ def crear_pdf():
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
 
     # ESPACIADO AUMENTADO EN 50%: de 21 a 31.5 puntos
-    espaciado_lineas = 31.5
+    espaciado_lineas = 29.5
 
     # Posiciones base
     x_base_izq = 90
