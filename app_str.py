@@ -13,6 +13,37 @@ import platform
 
 # --- Configuración de página ---
 st.set_page_config(page_title="Formulario S-24", layout="centered")
+
+# --- Estilo global para aumentar legibilidad (inputs y etiquetas +50%) ---
+st.markdown("""
+    <style>
+    /* Tamaño de letra para inputs */
+    input[type="number"], input[type="text"] {
+        font-size: 24px !important;
+    }
+    .stNumberInput input, .stTextInput input {
+        font-size: 24px !important;
+    }
+
+    /* Tamaño de letra para etiquetas de inputs, radio, selects */
+    label, .stRadio label, .stSelectbox label, .stTextInput label, .stNumberInput label {
+        font-size: 20px !important;
+    }
+
+    /* Subheaders */
+    h3 {
+        font-size: 26px !important;
+    }
+
+    /* Otros textos como markdown o TOTAL */
+    .markdown-text-container, .stMarkdown {
+        font-size: 20px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+
 st.title("📄 Generador de PDF - Registro de Transacción S-24")
 
 # --- Fecha manual (día, mes, año) ---
