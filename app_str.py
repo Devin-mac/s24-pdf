@@ -165,18 +165,18 @@ def crear_pdf():
     can.drawRightString(x_base_der, y, fecha_text)
     y -= 25
 
-    # APLICAR SANGRÍAS A PARTIR DE AQUÍ
+    # APLICAR SANGRÍAS
     sangria = 28.35  # 1cm en puntos
     x_izq = x_base_izq + sangria
     x_der = x_base_der - sangria
 
-    # Checkboxes con sangrías aplicadas
+    # Checkboxes (sin cambios)
     can.setFont("Helvetica", 18)
-    col_izq_x = x_izq + 20  # Posición del texto después del checkbox
-    col_der_x = 396  # Centro para segunda columna
+    col_izq_x = x_izq + 20
+    col_der_x = 396
     checkbox_size = 12
     
-    # Fila 1 - CON SANGRÍAS
+    # Fila 1
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
     can.drawString(col_izq_x, y, "Donación")
     
@@ -184,7 +184,7 @@ def crear_pdf():
     can.drawString(col_der_x + 20, y, "Pago")
     y -= 15
     
-    # Fila 2 - CON SANGRÍAS
+    # Fila 2
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO", checkbox_size)
     can.drawString(col_izq_x, y, "Depósito en la caja de efectivo")
     
@@ -192,58 +192,71 @@ def crear_pdf():
     can.drawString(col_der_x + 20, y, "Adelanto de efectivo")
     y -= 30
 
-    # TODAS LAS SECCIONES SIGUIENTES CON SANGRÍAS CONSISTENTES
+    # CONFIGURACIÓN PARA LÍNEAS DE VALORES
+    # Definir longitud fija para todas las líneas de valores (12 millones = "12,000,000")
+    longitud_linea_valores = 80  # Ancho fijo en puntos para líneas de valores
+    separacion_conceptos = 42.5  # 1.5cm en puntos (1.5 * 28.35)
+    
+    # Calcular posición X donde empiezan las líneas de valores (alineadas a la derecha)
+    x_inicio_lineas = x_der - longitud_linea_valores
+
     can.setFont("Helvetica", 18)
     
-    # Donaciones (Obra mundial) - CON SANGRÍA
+    # Donaciones (Obra mundial)
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
     if don_obra > 0:
         can.drawRightString(x_der, y, f"{don_obra:,}")
     else:
-        can.drawRightString(x_der, y, "_______________")
+        # Dibujar línea de longitud fija
+        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
     y -= 15
 
-    # Donaciones (Gastos de la congregación) - CON SANGRÍA
+    # Donaciones (Gastos de la congregación)
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
     if don_congre > 0:
         can.drawRightString(x_der, y, f"{don_congre:,}")
     else:
-        can.drawRightString(x_der, y, "_______________")
+        # Dibujar línea de longitud fija
+        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
     y -= 15
 
-    # Concepto adicional - CON SANGRÍA
+    # Concepto adicional (si existe)
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
             can.drawRightString(x_der, y, f"{valor_concepto:,}")
         else:
-            can.drawRightString(x_der, y, "_______________")
+            # Dibujar línea de longitud fija
+            can.line(x_inicio_lineas, y + 2, x_der, y + 2)
         y -= 15
 
-    # Líneas adicionales en blanco - CON SANGRÍAS
+    # Líneas adicionales en blanco con separación de 1.5cm
     lineas_extra = 3 if not concepto else 2
     for i in range(lineas_extra):
-        # Calcular líneas considerando las sangrías
-        ancho_linea = int((x_der - x_izq - 150) / 8)
-        can.drawString(x_izq, y, "_" * ancho_linea)
-        can.drawRightString(x_der, y, "_______________")
+        # Calcular posición para el concepto (1.5cm de separación de la línea de valores)
+        x_concepto_fin = x_inicio_lineas - separacion_conceptos
+        
+        # Línea para concepto (desde sangría hasta 1.5cm antes de la línea de valores)
+        can.line(x_izq, y + 2, x_concepto_fin, y + 2)
+        
+        # Línea para valores (longitud fija)
+        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+        
         y -= 15
 
     y -= 10
 
-    # TOTAL - CON SANGRÍA DERECHA
+    # TOTAL
     can.setFont("Helvetica-Bold", 22)
-    can.drawRightString(x_der - 100, y, "TOTAL:")
+    can.drawRightString(x_der - longitud_linea_valores - 10, y, "TOTAL:")
     if total > 0:
         can.drawRightString(x_der, y, f"{total:,}")
     else:
-        can.drawRightString(x_der, y, "_______________")
+        # Línea para total (misma longitud fija)
+        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
     y -= 60
 
-    # Resto del código permanece igual...
-    # (sección de firmas, etc.)
-    
-    # Sección de firmas (centradas, sin sangría)
+    # Resto del código permanece igual (firmas, etc.)
     firma1_x = 240
     firma2_x = 550
     firma_y = y - 40
@@ -274,7 +287,7 @@ def crear_pdf():
     can.save()
     buffer.seek(0)
     return buffer, firma_y
-
+    
 # --- Generar y mostrar PDF ---
 if enviado:
     pdf_base, firma_y_position = crear_pdf()
