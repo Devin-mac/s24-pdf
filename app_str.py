@@ -42,7 +42,7 @@ fecha_str = f"{fecha_seleccionada.day:02d} {meses_espanol[fecha_seleccionada.mon
 st.success(f"✅ **Fecha seleccionada:** {fecha_str}")
 
 # Información adicional
-st.info("💡 Haz clic en el campo de fecha de arriba para abrir el calendario y navegar entre meses y años fácilmente.")
+#st.info("💡 Haz clic en el campo de fecha de arriba para abrir el calendario y navegar entre meses y años fácilmente.")
 
 # --- Formulario de datos ---
 with st.form("formulario"):
