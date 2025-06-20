@@ -80,7 +80,7 @@ with st.form("formulario"):
     enviado = st.form_submit_button("📤 Generar PDF")
 
 # --- Función para dibujar checkbox cuadrado con X ---
-def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=12):
+def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=13):
     """
     Dibuja un checkbox como cuadrado con X si está marcado
     """
@@ -123,7 +123,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 190 if idx == 0 else 490
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=166, height=60)
+            can.drawImage(ImageReader(img_stream), x, y, width=186, height=60)
 
     can.save()
     firma_buffer.seek(0)
