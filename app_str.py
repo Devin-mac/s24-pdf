@@ -145,6 +145,9 @@ def crear_pdf():
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
 
+    # ESPACIADO AUMENTADO EN 50%: de 21 a 31.5 puntos
+    espaciado_lineas = 31.5
+
     # Posiciones base
     x_base_izq = 90
     x_base_der = 700
@@ -153,7 +156,7 @@ def crear_pdf():
     # Título centrado (sin sangría)
     can.setFont("Helvetica-Bold", 26)
     can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")
-    y -= 40
+    y -= 50  # Aumentado de 40 a 50 (25% más)
 
     # Línea de selección (sin sangría)
     can.setFont("Helvetica-Bold", 18)
@@ -162,7 +165,7 @@ def crear_pdf():
     # Fecha a la derecha
     fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
     can.drawRightString(x_base_der, y, fecha_text)
-    y -= 25
+    y -= espaciado_lineas  # Cambiado de 25 a espaciado_lineas
 
     # APLICAR SANGRÍAS A PARTIR DE AQUÍ
     sangria = 28.35  # 1cm en puntos
@@ -186,7 +189,7 @@ def crear_pdf():
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
     can.drawString(col_der_x + 20, y, "Pago")
-    y -= 21  # Espaciado de 1.5cm
+    y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
     
     # Fila 2 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO", checkbox_size)
@@ -194,7 +197,7 @@ def crear_pdf():
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "ADELANTO DE EFECTIVO", checkbox_size)
     can.drawString(col_der_x + 20, y, "Adelanto de efectivo")
-    y -= 30
+    y -= 45  # Aumentado de 30 a 45 (50% más)
 
     # TODAS LAS SECCIONES SIGUIENTES CON SANGRÍAS CONSISTENTES
     can.setFont("Helvetica", 18)
@@ -205,7 +208,7 @@ def crear_pdf():
         can.drawRightString(x_der, y, f"{don_obra:,}")
     else:
         can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-    y -= 21  # Espaciado de 1.5cm
+    y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Donaciones (Gastos de la congregación) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
@@ -213,7 +216,7 @@ def crear_pdf():
         can.drawRightString(x_der, y, f"{don_congre:,}")
     else:
         can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-    y -= 21  # Espaciado de 1.5cm
+    y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Concepto adicional - CON SANGRÍA
     if concepto:
@@ -222,7 +225,7 @@ def crear_pdf():
             can.drawRightString(x_der, y, f"{valor_concepto:,}")
         else:
             can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-        y -= 21  # Espaciado de 1.5cm
+        y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Líneas adicionales en blanco - CON SANGRÍAS
     lineas_extra = 3 if not concepto else 2
@@ -236,9 +239,9 @@ def crear_pdf():
         # Línea para valores (longitud fija)
         can.line(x_inicio_lineas, y + 2, x_der, y + 2)
         
-        y -= 21  # Espaciado de 1.5cm
+        y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
-    y -= 10
+    y -= 15  # Aumentado de 10 a 15 (50% más)
 
     # TOTAL - Alineado con el final de las líneas de conceptos
     can.setFont("Helvetica-Bold", 22)
@@ -253,7 +256,7 @@ def crear_pdf():
         can.drawRightString(x_der, y, f"{total:,}")
     else:
         can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-    y -= 60
+    y -= 90  # Aumentado de 60 a 90 (50% más)
 
     # Sección de firmas (centradas, sin sangría)
     firma1_x = 240
