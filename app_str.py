@@ -179,7 +179,7 @@ def crear_pdf():
     x_inicio_lineas = x_der - longitud_linea_valores
 
     # Checkboxes con sangrías aplicadas
-    can.setFont("Helvetica", 20)
+    can.setFont("Helvetica", 22)
     col_izq_x = x_izq + 20
     col_der_x = 396
     checkbox_size = 12
@@ -205,12 +205,12 @@ def crear_pdf():
     
     # Donaciones (Obra mundial) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
-    can.drawRightString(x_der, y, f"{don_obra:,.2f}".replace(",", "#").replace(".", ",").replace("#", "."))
+    can.drawRightString(x_der, y, f"{don_obra:,.2f}")
     y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Donaciones (Gastos de la congregación) - CON SANGRÍA
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
-    can.drawRightString(x_der, y, f"{don_congre:,.2f}".replace(",", "#").replace(".", ",").replace("#", "."))
+    can.drawRightString(x_der, y, f"{don_congre:,.2f}")
     y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
 
     # Concepto adicional - CON SANGRÍA
@@ -247,10 +247,7 @@ def crear_pdf():
     # Posicionar "TOTAL:" para que los ":" terminen justo donde termina la línea de conceptos
     can.drawRightString(x_concepto_fin, y, "TOTAL:")
     
-    if total > 0:
-        can.drawRightString(x_der, y, f"{total:,}")
-    else:
-        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+    can.drawRightString(x_der, y, f"{total:,.2f}")
     y -= 90  # Aumentado de 60 a 90 (50% más)
 
     # Sección de firmas (centradas, sin sangría)
