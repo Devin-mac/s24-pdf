@@ -120,105 +120,118 @@ def crear_pdf():
     x_derecha = 540
     y = 760
 
-    # Título
+    # Título centrado
     can.setFont("Helvetica-Bold", 14)
-    can.drawCentredString(300, y, "REGISTRO DE TRANSACCIÓN")
-    y -= 30
+    can.drawCentredString(306, y, "REGISTRO DE TRANSACCIÓN")
+    y -= 40
 
-    # Fecha
-    can.setFont("Helvetica", 10)
-    can.drawRightString(x_derecha, y, f"Fecha: {fecha_str}")
-    y -= 20
-
-    # Tipo transacción
+    # Línea con "Seleccione el tipo de transacción" y "Fecha"
     can.setFont("Helvetica-Bold", 10)
     can.drawString(x_izq, y, "Seleccione el tipo de transacción:")
-    y -= 18
-
-    can.setFont("Helvetica", 10)
-    opciones = {
-        "DONACIÓN": "Donación",
-        "PAGO": "Pago",
-        "DEPÓSITO EN LA CAJA DE EFECTIVO": "Depósito en la caja de efectivo",
-        "ADELANTO DE EFECTIVO": "Adelanto de efectivo"
-    }
-    for clave, texto in opciones.items():
-        marca = "X" if clave == tipo else " "
-        can.drawString(x_izq, y, f"[{marca}] {texto}")
-        y -= 15
-
-    can.line(x_izq, y, x_derecha, y)
+    
+    # Fecha a la derecha con línea
+    fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
+    can.drawRightString(x_derecha, y, fecha_text)
     y -= 25
 
-    # Donaciones
-    can.setFont("Helvetica-Bold", 10)
-    can.drawString(x_izq, y, "DETALLES DE LA TRANSACCIÓN")
-    y -= 18
+    # Tipos de transacción en 2 columnas
     can.setFont("Helvetica", 10)
+    
+    # Columna izquierda
+    col_izq_x = x_izq
+    col_der_x = 306  # Centro de la página
+    
+    # Fila 1
+    marca_donacion = "X" if tipo == "DONACIÓN" else " "
+    marca_pago = "X" if tipo == "PAGO" else " "
+    can.drawString(col_izq_x, y, f"[ {marca_donacion} ] Donación")
+    can.drawString(col_der_x, y, f"[ {marca_pago} ] Pago")
+    y -= 15
+    
+    # Fila 2
+    marca_deposito = "X" if tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO" else " "
+    marca_adelanto = "X" if tipo == "ADELANTO DE EFECTIVO" else " "
+    can.drawString(col_izq_x, y, f"[ {marca_deposito} ] Depósito en la caja de efectivo")
+    can.drawString(col_der_x, y, f"[ {marca_adelanto} ] Adelanto de efectivo")
+    y -= 30
 
-    can.drawString(x_izq, y, "Donaciones (Obra mundial):")
-    can.drawRightString(x_derecha, y, f"${don_obra:,.0f}")
+    # Sección de donaciones y conceptos
+    can.setFont("Helvetica", 10)
+    
+    # Donaciones (Obra mundial)
+    can.drawString(x_izq, y, "Donaciones (Obra mundial)")
+    if don_obra > 0:
+        can.drawRightString(x_derecha, y, f"{don_obra:,.0f}")
+    else:
+        can.drawRightString(x_derecha, y, "_______________")
     y -= 15
 
-    can.drawString(x_izq, y, "Donaciones (Gastos de la congregación):")
-    can.drawRightString(x_derecha, y, f"${don_congre:,.0f}")
+    # Donaciones (Gastos de la congregación)
+    can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
+    if don_congre > 0:
+        can.drawRightString(x_derecha, y, f"{don_congre:,.0f}")
+    else:
+        can.drawRightString(x_derecha, y, "_______________")
     y -= 15
 
+    # Concepto adicional si existe
     if concepto:
-        can.drawString(x_izq, y, f"{concepto}:")
-        can.drawRightString(x_derecha, y, f"${valor_concepto:,.0f}")
+        can.drawString(x_izq, y, concepto)
+        if valor_concepto > 0:
+            can.drawRightString(x_derecha, y, f"{valor_concepto:,.0f}")
+        else:
+            can.drawRightString(x_derecha, y, "_______________")
+        y -= 15
+
+    # Líneas adicionales en blanco (3 líneas como en el diseño)
+    lineas_extra = 3 if not concepto else 2
+    for i in range(lineas_extra):
+        can.drawString(x_izq, y, "_" * 45)
+        can.drawRightString(x_derecha, y, "_______________")
         y -= 15
 
     y -= 10
-    can.line(x_izq, y, x_derecha, y)
-    y -= 25
 
     # Total
     can.setFont("Helvetica-Bold", 12)
-    can.drawString(x_izq, y, "TOTAL:")
-    can.drawRightString(x_derecha, y, f"${total:,.0f}")
-    y -= 50
+    can.drawRightString(x_derecha - 100, y, "TOTAL:")
+    if total > 0:
+        can.drawRightString(x_derecha, y, f"{total:,.0f}")
+    else:
+        can.drawRightString(x_derecha, y, "_______________")
+    y -= 60
 
-    # NUEVO DISEÑO DE FIRMAS Y NOMBRES EN COLUMNAS
-    # Centrar las columnas respecto al ancho total del PDF (612 puntos)
-    centro_pdf = 306  # Mitad de 612 (ancho de letter)
-    separacion = 120  # Separación entre columnas
-    col1_x = centro_pdf - separacion  # Primera columna
-    col2_x = centro_pdf + separacion  # Segunda columna
-    
-    # Configuración de firmas
-    firma_width = 120
-    firma_height = 40
+    # Sección de firmas
+    # Posiciones centradas para las firmas
+    firma1_x = 180
+    firma2_x = 430
     firma_y = y - 40
     
-    # Espacio para las firmas (SIN recuadros)
-    # Las firmas se insertan directamente en este espacio
-    
-    # Líneas para los nombres (debajo del espacio de firmas)
+    # Líneas para firmas
+    linea_width = 120
     linea_y = firma_y - 10
-    linea_width = 140
-    can.line(col1_x - linea_width/2, linea_y, col1_x + linea_width/2, linea_y)  # Línea 1
-    can.line(col2_x - linea_width/2, linea_y, col2_x + linea_width/2, linea_y)  # Línea 2
+    can.line(firma1_x - linea_width/2, linea_y, firma1_x + linea_width/2, linea_y)
+    can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
     
-    # Nombres centrados sobre las líneas
+    # Nombres sobre las líneas
     can.setFont("Helvetica", 10)
-    nombre_y = linea_y + 5
-    can.drawCentredString(col1_x, nombre_y, nombre_1)
-    can.drawCentredString(col2_x, nombre_y, nombre_2)
+    if nombre_1:
+        can.drawCentredString(firma1_x, linea_y + 5, nombre_1)
+    if nombre_2:
+        can.drawCentredString(firma2_x, linea_y + 5, nombre_2)
     
-    # Etiquetas en negrita debajo de las líneas
-    can.setFont("Helvetica-Bold", 9)
-    etiqueta_y = linea_y - 15
-    can.drawCentredString(col1_x, etiqueta_y, "Rellenado por")
-    can.drawCentredString(col2_x, etiqueta_y, "Verificado por")
+    # Etiquetas debajo de las líneas
+    can.setFont("Helvetica", 9)
+    can.drawCentredString(firma1_x, linea_y - 15, "(Rellenado por)")
+    can.drawCentredString(firma2_x, linea_y - 15, "(Verificado por)")
 
-    # Etiqueta del formulario
+    # Código del formulario
     can.setFont("Helvetica-Bold", 8)
-    can.drawString(260, 30, "S-24-S 5/21")
+    can.drawString(60, 30, "S-24-S  5/21")
 
     can.save()
     buffer.seek(0)
-    return buffer, firma_y  # Devolver también la posición Y de las firmas
+    return buffer, firma_y
 
 # --- Generar y mostrar PDF ---
 if enviado:
