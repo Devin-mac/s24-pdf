@@ -9,6 +9,7 @@ from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfReader, PdfWriter
 import base64
 import streamlit.components.v1 as components
+import platform
 
 # --- Configuración de página ---
 st.set_page_config(page_title="Formulario S-24", layout="centered")
@@ -308,27 +309,64 @@ def crear_pdf():
     return buffer, firma_y
 
 # --- Generar y mostrar PDF ---
+import platform
+
 if enviado:
     try:
-        # Validar firmas antes de generar
         if firma1.image_data is None or firma2.image_data is None:
             st.error("❌ Ambas firmas son obligatorias para generar el PDF.")
         else:
-            # Crear PDF base
             pdf_base, firma_y_position = crear_pdf()
-
-            # Insertar firmas
             pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
-
-            # Verificar que el PDF tenga contenido
             pdf_bytes = pdf_final.getvalue()
+
             if pdf_bytes:
                 nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+
+                # --- NOTA si está en móvil ---
+                user_agent = st.session_state.get("user_agent", "")
+                if not user_agent:
+                    user_agent = st.text_input("Agente de usuario", label_visibility="collapsed")
+                    st.session_state.user_agent = user_agent
+
+                if "Android" in user_agent or "iPhone" in user_agent:
+                    st.info("📱 En dispositivos móviles, el nombre del archivo descargado puede cambiar. Puedes renombrarlo manualmente si lo necesitas.")
+
+                # Botón de descarga
                 st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
+
+                # Botón de compartir (móvil)
+                b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+                st.markdown("""
+                    <button onclick="sharePDF()">📤 Compartir PDF</button>
+                    <script>
+                    async function sharePDF() {
+                        const pdfData = atob('%s');
+                        const byteArray = new Uint8Array(pdfData.length);
+                        for (let i = 0; i < pdfData.length; i++) {
+                            byteArray[i] = pdfData.charCodeAt(i);
+                        }
+                        const blob = new Blob([byteArray], { type: 'application/pdf' });
+                        const file = new File([blob], '%s', { type: 'application/pdf' });
+
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                title: 'Compartir PDF',
+                                text: 'Te comparto el formulario S-24',
+                                files: [file]
+                            });
+                        } else {
+                            alert("Tu navegador no permite compartir archivos directamente.");
+                        }
+                    }
+                    </script>
+                """ % (b64_pdf, nombre_archivo), unsafe_allow_html=True)
+
             else:
-                st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
+                st.error("❌ El PDF generado está vacío.")
 
     except Exception as e:
         st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
+
 
 
