@@ -122,7 +122,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 190 if idx == 0 else 490
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=186, height=40)
+            can.drawImage(ImageReader(img_stream), x, y, width=186, height=60)
 
     can.save()
     firma_buffer.seek(0)
@@ -185,6 +185,9 @@ def crear_pdf():
     # Luego "Fecha:" en negrita, a la izquierda del valor
     can.setFont("Helvetica-Bold", 18)
     can.drawString(x_final - ancho_valor - ancho_etiqueta, y, etiqueta)
+
+    # 🔽 Evitar superposición con checkboxes
+    y -= espaciado_lineas
 
     # APLICAR SANGRÍAS A PARTIR DE AQUÍ
     sangria = 28.35  # 1cm en puntos
