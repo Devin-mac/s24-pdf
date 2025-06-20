@@ -1,5 +1,7 @@
 import streamlit as st
 from datetime import date
+import streamlit as st
+from datetime import date
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, landscape
 from io import BytesIO
@@ -97,11 +99,10 @@ def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=12):
 # --- Insertar firmas ---
 def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
     firma_buffer = BytesIO()
-    can = canvas.Canvas(firma_buffer, pagesize=landscape(letter))  # CAMBIO 2: Orientación horizontal
+    can = canvas.Canvas(firma_buffer, pagesize=landscape(letter))
 
     for idx, firma_data in enumerate([firma1_data, firma2_data]):
         if firma_data is not None:
-            # CAMBIO 1: Convertir firma a azul y más gruesa
             firma_img = Image.fromarray(firma_data)
             # Convertir a azul y hacer más gruesa la firma
             import numpy as np
@@ -120,8 +121,8 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             img_stream.seek(0)
 
             # Ajustar posiciones para orientación horizontal
-            x = 190 if idx == 0 else 490  # Posiciones ajustadas para horizontal
-            y = firma_y_pos + 5  # Posicionar las firmas justo encima de las líneas de nombres
+            x = 190 if idx == 0 else 490
+            y = firma_y_pos + 5
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
     can.save()
@@ -276,7 +277,6 @@ def crear_pdf():
     can.save()
     buffer.seek(0)
     return buffer, firma_y
-
 
 # --- Generar y mostrar PDF ---
 if enviado:
