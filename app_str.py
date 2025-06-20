@@ -134,12 +134,12 @@ def crear_pdf():
     y = 550  # CAMBIO 2: Ajuste altura inicial para horizontal
 
     # Título centrado
-    can.setFont("Helvetica-Bold", 16)
+    can.setFont("Helvetica-Bold", 20)
     can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")  # CAMBIO 2: Centro horizontal (792/2)
     y -= 40
 
     # Línea con "Seleccione el tipo de transacción" y "Fecha"
-    can.setFont("Helvetica-Bold", 12)
+    can.setFont("Helvetica-Bold", 16)
     can.drawString(x_izq, y, "Seleccione el tipo de transacción:")
     
     # Fecha a la derecha con línea
@@ -148,7 +148,7 @@ def crear_pdf():
     y -= 25
 
     # Tipos de transacción en 2 columnas
-    can.setFont("Helvetica", 12)
+    can.setFont("Helvetica", 14)
     
     # Columna izquierda
     col_izq_x = x_izq
@@ -169,7 +169,7 @@ def crear_pdf():
     y -= 30
 
     # Sección de donaciones y conceptos
-    can.setFont("Helvetica", 12)
+    can.setFont("Helvetica", 16)
     
     # Donaciones (Obra mundial)
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
@@ -206,7 +206,7 @@ def crear_pdf():
     y -= 10
 
     # Total
-    can.setFont("Helvetica-Bold", 14)
+    can.setFont("Helvetica-Bold", 18)
     can.drawRightString(x_derecha - 100, y, "TOTAL:")
     if total > 0:
         can.drawRightString(x_derecha, y, f"{total:,}")
@@ -227,7 +227,7 @@ def crear_pdf():
     can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
     
     # Nombres sobre las líneas
-    can.setFont("Helvetica", 10)
+    can.setFont("Helvetica", 12)
     if nombre_1:
         can.drawCentredString(firma1_x, linea_y + 5, nombre_1)
     if nombre_2:
@@ -239,7 +239,7 @@ def crear_pdf():
     can.drawCentredString(firma2_x, linea_y - 15, "(Verificado por)")
 
     # Código del formulario - CAMBIO 3: Dos líneas después de "Rellenado por"
-    can.setFont("Helvetica-Bold", 8)
+    can.setFont("Helvetica-Bold", 10)
     codigo_y = linea_y - 15 - 20  # Dos líneas después de "(Rellenado por)"
     can.drawString(90, codigo_y, "S-24-S  5/21")
 
