@@ -207,7 +207,7 @@ def crear_pdf():
     
     # Fila 1 - CON SANGRÍAS
     dibujar_checkbox_cuadrado(can, x_izq, y-2, tipo == "DONACIÓN", checkbox_size)
-    can.setFont("Helvetica", 18)
+    can.setFont("Helvetica", 24)
     can.drawString(col_izq_x, y, "Donación")
     
     dibujar_checkbox_cuadrado(can, col_der_x, y-2, tipo == "PAGO", checkbox_size)
