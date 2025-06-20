@@ -56,7 +56,7 @@ with st.form("formulario"):
 
     st.subheader("📌 Concepto adicional (opcional)")
     concepto = st.text_input("Descripción del concepto")
-    valor_concepto = st.number_input("Valor del concepto", min_value=0, value=0)
+    valor_concepto = st.number_input("Valor del concepto o depósito en caja de efectivo", min_value=0, value=0)
 
     total = sum(v for v in [don_obra, don_congre, valor_concepto] if v is not None)
     st.markdown(f"**TOTAL: ${total:,} COP**")
@@ -253,7 +253,7 @@ def crear_pdf():
     if concepto:
         can.drawString(x_izq, y, concepto)
         if valor_concepto > 0:
-            can.drawRightString(x_der, y, f"{valor_concepto:,.2f}")
+            can.drawRightString(x_der, y, f"{valor_concepto :,.2f}")
         else:
             can.line(x_inicio_lineas, y + 2, x_der, y + 2)
         y -= espaciado_lineas  # Cambiado de 21 a espaciado_lineas
