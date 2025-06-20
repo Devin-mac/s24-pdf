@@ -309,22 +309,44 @@ def crear_pdf():
 
 # --- Generar y mostrar PDF ---
 if enviado:
-    pdf_base, firma_y_position = crear_pdf()
-    pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
-    nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+    try:
+        # Crear PDF base
+        pdf_base, firma_y_position = crear_pdf()
 
-    # Mostrar vista previa
-    b64_pdf = base64.b64encode(pdf_final.getvalue()).decode("utf-8")
-    pdf_viewer = f'''
-        <iframe 
-            src="data:application/pdf;base64,{b64_pdf}" 
-            width="100%" 
-            height="500" 
-            type="application/pdf">
-        </iframe>
-    '''
-    st.success("✅ Vista previa del PDF generada:")
-    components.html(pdf_viewer, height=510, scrolling=True, unsafe_allow_html=True)
+        # Insertar firmas si hay datos válidos
+        if firma1.image_data is not None and firma2.image_data is not None:
+            pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
+        else:
+            st.warning("⚠️ Al menos una firma está vacía. El PDF se generará sin firmas.")
+            pdf_final = pdf_base
 
-    # Botón de descarga
-    st.download_button("📥 Descargar PDF", data=pdf_final, file_name=nombre_archivo, mime="application/pdf")
+        # Verificar tamaño del PDF generado
+        pdf_bytes = pdf_final.getvalue()
+        st.write("Tamaño PDF final:", len(pdf_bytes))
+
+        if pdf_bytes:
+            # Codificar en base64 para vista previa
+            try:
+                b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+                pdf_viewer = f'''
+                    <iframe 
+                        src="data:application/pdf;base64,{b64_pdf}" 
+                        width="100%" 
+                        height="500" 
+                        type="application/pdf">
+                    </iframe>
+                '''
+                st.success("✅ Vista previa del PDF generada:")
+                components.html(pdf_viewer, height=510, scrolling=True, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"❌ Error al generar la vista previa en base64: {e}")
+        else:
+            st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
+
+        # Botón de descarga
+        nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+        st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
+
+    except Exception as e:
+        st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
+
