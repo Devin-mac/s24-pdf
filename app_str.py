@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import date
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from io import BytesIO
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
@@ -81,17 +81,30 @@ with st.form("formulario"):
 # --- Insertar firmas ---
 def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
     firma_buffer = BytesIO()
-    can = canvas.Canvas(firma_buffer, pagesize=letter)
+    can = canvas.Canvas(firma_buffer, pagesize=landscape(letter))  # CAMBIO 2: Orientación horizontal
 
     for idx, firma_data in enumerate([firma1_data, firma2_data]):
         if firma_data is not None:
+            # CAMBIO 1: Convertir firma a azul y más gruesa
             firma_img = Image.fromarray(firma_data)
+            # Convertir a azul y hacer más gruesa la firma
+            import numpy as np
+            firma_array = np.array(firma_img)
+            # Crear máscara para píxeles negros (firma)
+            mascara_firma = np.all(firma_array[:, :, :3] == [0, 0, 0], axis=-1)
+            # Hacer la firma más gruesa (dilatación simple)
+            from scipy import ndimage
+            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=2)
+            # Aplicar color azul a la firma gruesa
+            firma_array[mascara_gruesa] = [0, 0, 255, 255]  # Azul
+            firma_img_azul = Image.fromarray(firma_array)
+            
             img_stream = BytesIO()
-            firma_img.save(img_stream, format="PNG")
+            firma_img_azul.save(img_stream, format="PNG")
             img_stream.seek(0)
 
-            # Ajustar posiciones para centrar las firmas correctamente
-            x = (186-60) if idx == 0 else (426-60)  # Centrar las firmas en cada columna
+            # Ajustar posiciones para orientación horizontal
+            x = 180 if idx == 0 else 480  # Posiciones ajustadas para horizontal
             y = firma_y_pos + 5  # Posicionar las firmas justo encima de las líneas de nombres
             can.drawImage(ImageReader(img_stream), x, y, width=120, height=40)
 
@@ -114,15 +127,15 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
 # --- Crear PDF desde cero ---
 def crear_pdf():
     buffer = BytesIO()
-    can = canvas.Canvas(buffer, pagesize=letter)
+    can = canvas.Canvas(buffer, pagesize=landscape(letter))  # CAMBIO 2: Orientación horizontal
 
     x_izq = 60
-    x_derecha = 540
-    y = 760
+    x_derecha = 730  # CAMBIO 2: Ajuste para orientación horizontal (792-60)
+    y = 550  # CAMBIO 2: Ajuste altura inicial para horizontal
 
     # Título centrado
     can.setFont("Helvetica-Bold", 14)
-    can.drawCentredString(306, y, "REGISTRO DE TRANSACCIÓN")
+    can.drawCentredString(396, y, "REGISTRO DE TRANSACCIÓN")  # CAMBIO 2: Centro horizontal (792/2)
     y -= 40
 
     # Línea con "Seleccione el tipo de transacción" y "Fecha"
@@ -139,7 +152,7 @@ def crear_pdf():
     
     # Columna izquierda
     col_izq_x = x_izq
-    col_der_x = 306  # Centro de la página
+    col_der_x = 396  # CAMBIO 2: Centro de la página horizontal
     
     # Fila 1
     marca_donacion = "X" if tipo == "DONACIÓN" else " "
@@ -202,9 +215,9 @@ def crear_pdf():
     y -= 60
 
     # Sección de firmas
-    # Posiciones centradas para las firmas
-    firma1_x = 180
-    firma2_x = 430
+    # Posiciones centradas para las firmas - CAMBIO 2: Ajustadas para horizontal
+    firma1_x = 240
+    firma2_x = 550
     firma_y = y - 40
     
     # Líneas para firmas
@@ -225,9 +238,10 @@ def crear_pdf():
     can.drawCentredString(firma1_x, linea_y - 15, "(Rellenado por)")
     can.drawCentredString(firma2_x, linea_y - 15, "(Verificado por)")
 
-    # Código del formulario
+    # Código del formulario - CAMBIO 3: Dos líneas después de "Rellenado por"
     can.setFont("Helvetica-Bold", 8)
-    can.drawString(60, 30, "S-24-S  5/21")
+    codigo_y = linea_y - 15 - 20  # Dos líneas después de "(Rellenado por)"
+    can.drawString(60, codigo_y, "S-24-S  5/21")
 
     can.save()
     buffer.seek(0)
