@@ -59,7 +59,7 @@ with st.form("formulario"):
     firma1 = st_canvas(
         key="firma1",
         height=300,
-        width=700,
+        width=900,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
@@ -70,7 +70,7 @@ with st.form("formulario"):
     firma2 = st_canvas(
         key="firma2",
         height=300,
-        width=700,
+        width=900,
         drawing_mode="freedraw",
         stroke_width=2,
         stroke_color="black",
