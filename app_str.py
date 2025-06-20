@@ -323,47 +323,24 @@ if enviado:
             if pdf_bytes:
                 nombre_archivo = f"{fecha_str} - {tipo}.pdf"
 
-                # --- NOTA si está en móvil ---
-                user_agent = st.session_state.get("user_agent", "")
-                if not user_agent:
-                    user_agent = st.text_input("Agente de usuario", label_visibility="collapsed")
-                    st.session_state.user_agent = user_agent
-
-                if "Android" in user_agent or "iPhone" in user_agent:
-                    st.info("📱 En dispositivos móviles, el nombre del archivo descargado puede cambiar. Puedes renombrarlo manualmente si lo necesitas.")
+                # Nota informativa para móviles
+                st.markdown("""
+                <div style="border:1px solid #ccc; padding:10px; border-radius:10px; background:#f9f9f9">
+                📱 <b>¿Usas un celular?</b><br>
+                Es posible que el archivo descargado tenga un nombre genérico como <i>file.pdf</i>. Puedes renombrarlo después.<br><br>
+                Para <b>compartir</b> el archivo (por WhatsApp, correo, Google Drive, etc.), abre el PDF desde tu dispositivo y usa el botón de <i>Compartir</i>.
+                </div>
+                """, unsafe_allow_html=True)
 
                 # Botón de descarga
-                st.download_button("📥 Descargar PDF", data=pdf_bytes, file_name=nombre_archivo, mime="application/pdf")
-
-                # Botón de compartir (móvil)
-                b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-                st.markdown("""
-                    <button onclick="sharePDF()">📤 Compartir PDF</button>
-                    <script>
-                    async function sharePDF() {
-                        const pdfData = atob('%s');
-                        const byteArray = new Uint8Array(pdfData.length);
-                        for (let i = 0; i < pdfData.length; i++) {
-                            byteArray[i] = pdfData.charCodeAt(i);
-                        }
-                        const blob = new Blob([byteArray], { type: 'application/pdf' });
-                        const file = new File([blob], '%s', { type: 'application/pdf' });
-
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                title: 'Compartir PDF',
-                                text: 'Te comparto el formulario S-24',
-                                files: [file]
-                            });
-                        } else {
-                            alert("Tu navegador no permite compartir archivos directamente.");
-                        }
-                    }
-                    </script>
-                """ % (b64_pdf, nombre_archivo), unsafe_allow_html=True)
-
+                st.download_button(
+                    "📥 Descargar PDF",
+                    data=pdf_bytes,
+                    file_name=nombre_archivo,
+                    mime="application/pdf"
+                )
             else:
-                st.error("❌ El PDF generado está vacío.")
+                st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
 
     except Exception as e:
         st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
