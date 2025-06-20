@@ -122,7 +122,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
             # Ajustar posiciones para orientación horizontal
             x = 190 if idx == 0 else 490
             y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=156, height=40)
+            can.drawImage(ImageReader(img_stream), x, y, width=186, height=40)
 
     can.save()
     firma_buffer.seek(0)
@@ -163,10 +163,28 @@ def crear_pdf():
     can.drawString(x_base_izq, y, "Seleccione el tipo de transacción:")
     
     # Fecha a la derecha
-    fecha_text = f"Fecha: {fecha_str}" if fecha_str else "Fecha: _______________"
-    can.setFont("Helvetica", 18)  # Quitar la negrita
-    can.drawRightString(x_base_der, y, fecha_text)
-    y -= espaciado_lineas  # Cambiado de 25 a espaciado_lineas
+    # Texto de la fecha separado: "Fecha:" en negrita, valor en regular
+    etiqueta = "Fecha:"
+    valor = fecha_str if fecha_str else "_______________"
+    
+    # Medimos el ancho de los textos
+    can.setFont("Helvetica-Bold", 18)
+    ancho_etiqueta = can.stringWidth(etiqueta + " ", "Helvetica-Bold", 18)
+    
+    can.setFont("Helvetica", 18)
+    ancho_valor = can.stringWidth(valor, "Helvetica", 18)
+    
+    # Posición final derecha
+    x_final = x_base_der
+    
+    # Dibujo las partes por separado, alineadas a la derecha
+    # Primero el valor sin negrita
+    can.setFont("Helvetica", 18)
+    can.drawString(x_final - ancho_valor, y, valor)
+    
+    # Luego "Fecha:" en negrita, a la izquierda del valor
+    can.setFont("Helvetica-Bold", 18)
+    can.drawString(x_final - ancho_valor - ancho_etiqueta, y, etiqueta)
 
     # APLICAR SANGRÍAS A PARTIR DE AQUÍ
     sangria = 28.35  # 1cm en puntos
@@ -256,7 +274,7 @@ def crear_pdf():
     firma_y = y - 40
     
     # Líneas para firmas
-    linea_width = 156
+    linea_width = 186
     linea_y = firma_y - 10
     can.line(firma1_x - linea_width/2, linea_y, firma1_x + linea_width/2, linea_y)
     can.line(firma2_x - linea_width/2, linea_y, firma2_x + linea_width/2, linea_y)
