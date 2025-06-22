@@ -16,7 +16,6 @@ st.set_page_config(page_title="Formulario S-24", layout="centered")
 st.title("📄 Generador de PDF - Registro de Transacción S-24")
 
 # --- Fecha con calendario ---
-# --- Fecha con calendario (date_input) ---
 st.subheader("📆 Fecha de transacción")
 
 # Meses en español para el formato final
@@ -40,9 +39,6 @@ fecha_str = f"{fecha_seleccionada.day:02d} {meses_espanol[fecha_seleccionada.mon
 
 # Mostrar la fecha seleccionada
 st.success(f"✅ **Fecha seleccionada:** {fecha_str}")
-
-# Información adicional
-#st.info("💡 Haz clic en el campo de fecha de arriba para abrir el calendario y navegar entre meses y años fácilmente.")
 
 # --- Formulario de datos ---
 with st.form("formulario"):
@@ -105,51 +101,74 @@ def dibujar_checkbox_cuadrado(canvas, x, y, marcado=False, size=18):
         y_center = y + 2
         canvas.drawString(x_center, y_center, "X")
 
-# --- Insertar firmas ---
-def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
-    firma_buffer = BytesIO()
-    can = canvas.Canvas(firma_buffer, pagesize=landscape(letter))
-
-    for idx, firma_data in enumerate([firma1_data, firma2_data]):
+# --- Función para procesar firma (versión simplificada y natural) ---
+def procesar_firma(firma_data):
+    """
+    Procesa la firma de manera natural sin modificaciones
+    """
+    try:
         if firma_data is not None:
-            # Convertir firma a azul y más gruesa
+            # Convertir directamente a imagen PIL
             firma_img = Image.fromarray(firma_data)
-            # Convertir a azul y hacer más gruesa la firma
-            import numpy as np
-            firma_array = np.array(firma_img)
-            # Crear máscara para píxeles negros (firma)
-            mascara_firma = np.all(firma_array[:, :, :3] == [0, 0, 0], axis=-1)
-            # Hacer la firma más gruesa (dilatación simple)
-            from scipy import ndimage
-            mascara_gruesa = ndimage.binary_dilation(mascara_firma, iterations=8)
-            # Aplicar color azul a la firma gruesa
-            firma_array[mascara_gruesa] = [0, 0, 255, 255]  # Azul
-            firma_img_azul = Image.fromarray(firma_array)
             
+            # Crear un BytesIO para la imagen
             img_stream = BytesIO()
-            firma_img_azul.save(img_stream, format="PNG")
+            firma_img.save(img_stream, format="PNG")
             img_stream.seek(0)
+            
+            return img_stream
+        return None
+    except Exception as e:
+        print(f"Error procesando firma: {e}")
+        return None
 
-            # Ajustar posiciones para orientación horizontal
-            x = 150 if idx == 0 else 470
-            y = firma_y_pos + 5
-            can.drawImage(ImageReader(img_stream), x, y, width=226, height=80)
+# --- Insertar firmas (versión simplificada) ---
+def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
+    """
+    Inserta las firmas en el PDF de manera natural
+    """
+    try:
+        firma_buffer = BytesIO()
+        can = canvas.Canvas(firma_buffer, pagesize=landscape(letter))
 
-    can.save()
-    firma_buffer.seek(0)
+        # Procesar y añadir firmas
+        for idx, firma_data in enumerate([firma1_data, firma2_data]):
+            if firma_data is not None:
+                firma_stream = procesar_firma(firma_data)
+                if firma_stream:
+                    # Ajustar posiciones para orientación horizontal
+                    x = 150 if idx == 0 else 470
+                    y = firma_y_pos + 5
+                    
+                    # Insertar la firma con su aspecto natural
+                    can.drawImage(
+                        ImageReader(firma_stream), 
+                        x, y, 
+                        width=226, 
+                        height=80,
+                        preserveAspectRatio=True
+                    )
 
-    base_pdf = PdfReader(pdf_bytes)
-    firma_pdf = PdfReader(firma_buffer)
-    writer = PdfWriter()
+        can.save()
+        firma_buffer.seek(0)
 
-    page = base_pdf.pages[0]
-    page.merge_page(firma_pdf.pages[0])
-    writer.add_page(page)
+        # Combinar con el PDF base
+        base_pdf = PdfReader(pdf_bytes)
+        firma_pdf = PdfReader(firma_buffer)
+        writer = PdfWriter()
 
-    final_output = BytesIO()
-    writer.write(final_output)
-    final_output.seek(0)
-    return final_output
+        page = base_pdf.pages[0]
+        page.merge_page(firma_pdf.pages[0])
+        writer.add_page(page)
+
+        final_output = BytesIO()
+        writer.write(final_output)
+        final_output.seek(0)
+        return final_output
+        
+    except Exception as e:
+        print(f"Error insertando firmas: {e}")
+        return BytesIO(pdf_bytes.getvalue())
 
 # --- Crear PDF desde cero ---
 def crear_pdf():
@@ -211,7 +230,6 @@ def crear_pdf():
     x_inicio_lineas = x_der - longitud_linea_valores
 
     # Checkboxes con sangrías aplicadas
-    #can.setFont("Helvetica", 22)
     col_izq_x = x_izq + 20
     col_der_x = 396
     checkbox_size = 14
@@ -319,8 +337,6 @@ def crear_pdf():
     return buffer, firma_y
 
 # --- Generar y mostrar PDF ---
-#import platform
-
 if enviado:
     try:
         if firma1.image_data is None or firma2.image_data is None:
