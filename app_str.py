@@ -47,12 +47,12 @@ with st.form("formulario"):
     ])
 
     st.subheader("💰 Donaciones")
-    don_obra = st.number_input("Donaciones (Obra mundial)", min_value=0, value=0)
-    don_congre = st.number_input("Donaciones (Gastos de la congregación)", min_value=0, value=0)
+    don_obra = st.number_input("Donaciones (Obra mundial)", min_value=0, value=None)
+    don_congre = st.number_input("Donaciones (Gastos de la congregación)", min_value=0, value=None)
 
     st.subheader("📌 Concepto adicional (opcional)")
     concepto = st.text_input("Descripción del concepto")
-    valor_concepto = st.number_input("Valor del concepto o depósito en caja de efectivo", min_value=0, value=0)
+    valor_concepto = st.number_input("Valor del concepto o depósito en caja de efectivo", min_value=0, value=None)
 
     total = sum(v for v in [don_obra, don_congre, valor_concepto] if v is not None)
     st.markdown(f"**TOTAL: ${total:,} COP**")
