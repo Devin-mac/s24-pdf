@@ -301,6 +301,9 @@ def crear_pdf():
     # Posicionar "TOTAL:" para que los ":" terminen justo donde termina la línea de conceptos
     can.drawRightString(x_concepto_fin, y, "TOTAL:")
     
+    # Cambiar a fuente más pequeña para el número y añadir separación
+    can.setFont("Helvetica-Bold", 18)  # Fuente más pequeña para el número
+    separacion_total = 15  # Separación entre "TOTAL:" y el número
     can.drawRightString(x_der, y, f"{total:,.2f}")
     y -= 90  # Aumentado de 60 a 90 (50% más)
 
