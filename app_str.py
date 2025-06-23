@@ -47,31 +47,68 @@ with st.form("formulario"):
     ])
 
     st.subheader("💰 Donaciones")
-    don_obra = st.number_input(
-        "Donaciones (Obra mundial)", 
-        min_value=0, 
-        value=0,
-        placeholder="Ingrese el monto",
-        help="Monto en pesos colombianos"
-    )
-
     
-    don_congre = st.number_input(
-        "Donaciones (Gastos de la congregación)", 
-        min_value=0, 
-        value=0,
-        placeholder="Ingrese el monto",
-        help="Monto en pesos colombianos"
+    # Función para formatear números con separadores de miles
+    def formatear_numero_elegante(key, label, help_text="Monto en pesos colombianos"):
+        # Crear dos columnas: una para input, otra para mostrar formato
+        col_input, col_formato = st.columns([2, 1])
+        
+        with col_input:
+            valor_raw = st.text_input(
+                label,
+                key=key,
+                placeholder="Ej: 50000",
+                help=help_text
+            )
+        
+        # Procesar y mostrar formato elegante
+        if valor_raw and valor_raw.strip():
+            try:
+                # Limpiar: remover todo excepto dígitos
+                solo_numeros = ''.join(filter(str.isdigit, valor_raw))
+                
+                if solo_numeros:
+                    numero = int(solo_numeros)
+                    
+                    with col_formato:
+                        # Mostrar formato elegante con colores
+                        if numero >= 1000000:  # 1 millón o más
+                            st.success(f"💰 **${numero:,}**")
+                        elif numero >= 100000:  # 100k o más
+                            st.info(f"💰 **${numero:,}**")
+                        elif numero > 0:  # Cualquier cantidad positiva
+                            st.write(f"💰 **${numero:,}**")
+                    
+                    return numero
+                else:
+                    return 0
+            except ValueError:
+                with col_formato:
+                    st.error("❌ Solo números")
+                return 0
+        else:
+            return 0
+    
+    # Aplicar el formato elegante a cada campo
+    don_obra = formatear_numero_elegante(
+        "don_obra_key", 
+        "Donaciones (Obra mundial)",
+        "Escriba solo números. Ej: 50000 se mostrará como $50,000"
+    )
+    
+    don_congre = formatear_numero_elegante(
+        "don_congre_key", 
+        "Donaciones (Gastos de la congregación)",
+        "Escriba solo números. Ej: 25000 se mostrará como $25,000"
     )
 
-    st.subheader("📌 Concepto(s) adicional(es) (opcional)")
+    st.subheader("📌 Concepto adicional (opcional)")
     concepto = st.text_input("Descripción del concepto")
-    valor_concepto = st.number_input(
-        "Valor del concepto o depósito en caja de efectivo", 
-        min_value=0, 
-        value=0,
-        placeholder="Ingrese el monto",
-        help="Monto en pesos colombianos"
+    
+    valor_concepto = formatear_numero_elegante(
+        "valor_concepto_key", 
+        "Valor del concepto o depósito en caja de efectivo",
+        "Escriba solo números. Ej: 10000 se mostrará como $10,000"
     )
 
     total = sum(v for v in [don_obra, don_congre, valor_concepto] if v is not None)
