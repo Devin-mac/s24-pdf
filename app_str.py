@@ -413,10 +413,10 @@ if enviado:
                 st.markdown("""
                 <div style="border:1px solid #ccc; padding:10px; border-radius:10px; background:#f9f9f9">
                 ⚠️ <b>Antes de generar el pdf  </b><br>
-                Asegúrate que la información del recibo esté correcta.<br>
+                Asegúrate que la información del recibo esté correcta.<br><br>
                 📱 <b>¿Usas un celular?</b><br>
                 Es posible que el archivo descargado tenga un nombre genérico como <i>file.pdf</i>. Puedes renombrarlo después.<br><br>
-                Para <b>compartir</b> el archivo (por WhatsApp, correo, Google Drive, etc.), abre el PDF desde tu dispositivo y usa el botón de <i>Compartir</i>.
+                Para <b>compartir</b> el archivo (por WhatsApp, Telegram, Google Drive, etc.), abre el PDF desde tu dispositivo y usa el botón de <i>Compartir</i>.
                 </div>
                 """, unsafe_allow_html=True)
 
