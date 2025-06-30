@@ -43,7 +43,7 @@ st.success(f"✅ **Fecha seleccionada:** {fecha_str}")
 # --- Formulario de datos ---
 with st.form("formulario"):
     tipo = st.radio("Seleccione el tipo de transacción", [
-        "DONACIÓN", "PAGO", "DEPÓSITO EN LA CAJA DE EFECTIVO", "ADELANTO DE EFECTIVO"
+        "DONACIÓN", "PAGO", "DEPÓSITO EN LA CAJA DE EFECTIVO", "ADELANTO DE EFECTIVO","OTRO"
     ])
 
     st.subheader("💰 Donaciones")
