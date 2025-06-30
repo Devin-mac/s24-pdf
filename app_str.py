@@ -103,7 +103,7 @@ with st.form("formulario"):
         "Escriba solo números. Ej: 25000 se mostrará como $25,000"
     )
 
-    st.subheader("📌 Concepto adicional (opcional)")
+    st.subheader("📌 Otros conceptos (opcional)")
     concepto = st.text_input("Descripción del concepto")
     
     valor_concepto = formatear_numero_elegante(
