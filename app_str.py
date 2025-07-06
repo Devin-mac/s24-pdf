@@ -291,24 +291,25 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor):
     can.drawRightString(x_der, y, f"{don_congre:,.2f}")
     y -= espaciado_lineas
 
+    # Contar cuántos conceptos se van a mostrar
+    conceptos_mostrados = 0
+    
     if conc1_nombre and conc1_valor > 0:
         can.drawString(x_izq, y, conc1_nombre)
         can.drawRightString(x_der, y, f"{conc1_valor:,.2f}")
         y -= espaciado_lineas
-    else:
-        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-        y -= espaciado_lineas
+        conceptos_mostrados += 1
 
     if conc2_nombre and conc2_valor > 0:
         can.drawString(x_izq, y, conc2_nombre)
         can.drawRightString(x_der, y, f"{conc2_valor:,.2f}")
         y -= espaciado_lineas
-    else:
-        can.line(x_inicio_lineas, y + 2, x_der, y + 2)
-        y -= espaciado_lineas
+        conceptos_mostrados += 1
 
-    lineas_extra = 2
-    for _ in range(lineas_extra):
+    # Dibujar líneas vacías para completar un total de 3 líneas
+    lineas_vacias_necesarias = 3 - conceptos_mostrados
+    
+    for _ in range(lineas_vacias_necesarias):
         x_concepto_fin = x_inicio_lineas - separacion_conceptos
         can.line(x_izq, y + 2, x_concepto_fin, y + 2)
         can.line(x_inicio_lineas, y + 2, x_der, y + 2)
