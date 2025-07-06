@@ -138,8 +138,8 @@ with st.form("formulario"):
 
     st.markdown('<hr>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">💰 Donaciones</div>', unsafe_allow_html=True)
-    don_obra = formatear_numero_elegante("don_obra_key", "Donaciones (Obra mundial)")
-    don_congre = formatear_numero_elegante("don_congre_key", "Donaciones (Gastos de la congregación)")
+    don_obra = formatear_numero_elegante("don_obra_key", "OBRA MUNDIAL (OM)")
+    don_congre = formatear_numero_elegante("don_congre_key", "GASTOS DE LA CONGREGACIÓN (GC)")
 
     st.markdown('<hr>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📌 Otros Conceptos</div>', unsafe_allow_html=True)
