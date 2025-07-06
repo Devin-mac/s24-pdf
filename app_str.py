@@ -283,11 +283,11 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor):
     y -= 45
 
     can.setFont("Helvetica", 18)
-    can.drawString(x_izq, y, "OBRA MUNDIAL (OM)")
+    can.drawString(x_izq, y, "Donaciones (Obra mundial)")
     can.drawRightString(x_der, y, f"{don_obra:,.2f}")
     y -= espaciado_lineas
 
-    can.drawString(x_izq, y, "GASTOS DE LA CONGREGACIÓN (GC)")
+    can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
     can.drawRightString(x_der, y, f"{don_congre:,.2f}")
     y -= espaciado_lineas
 
