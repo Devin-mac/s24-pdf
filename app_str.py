@@ -1,5 +1,6 @@
 import streamlit as st
-from datetime import date
+from datetime import date, datetime
+import pytz
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -81,7 +82,6 @@ meses_espanol = [
 ]
 
 
-
 # --- Función para formatear números con separadores de miles ---
 def formatear_numero_elegante(key, label, help_text="Monto en pesos colombianos"):
     col_input, col_formato = st.columns([2, 1])
@@ -109,6 +109,12 @@ def formatear_numero_elegante(key, label, help_text="Monto en pesos colombianos"
     else:
         return 0
 
+# --- CONFIGURACIÓN DE ZONA HORARIA DE QUITO ---
+# Crear zona horaria para Quito (UTC-5)
+quito_tz = pytz.timezone('America/Guayaquil')  # Ecuador usa America/Guayaquil como zona horaria
+fecha_actual = datetime.now(quito_tz).date()  #ajusta la fecha y hora de quito
+
+
 # --- Formulario de datos ---
 with st.form("formulario"):
     st.markdown('<div class="container">', unsafe_allow_html=True)
@@ -116,7 +122,7 @@ with st.form("formulario"):
     st.markdown('<div class="section-title">📅 Fecha de transacción</div>', unsafe_allow_html=True)
     fecha_seleccionada = st.date_input(
         "Selecciona la fecha de la transacción:",
-        value=date.today(),
+        value=fecha_actual  #cambio de zona horaria para quito
         min_value=date(2020, 1, 1),
         max_value=date(2030, 12, 31),
         format="DD/MM/YYYY",
