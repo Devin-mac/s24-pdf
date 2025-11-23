@@ -122,7 +122,7 @@ with st.form("formulario"):
     st.markdown('<div class="section-title">📅 Fecha de transacción</div>', unsafe_allow_html=True)
     fecha_seleccionada = st.date_input(
         "Selecciona la fecha de la transacción:",
-        value=fecha_actual  #cambio de zona horaria para quito
+        value=fecha_actual,  #cambio de zona horaria para quito
         min_value=date(2020, 1, 1),
         max_value=date(2030, 12, 31),
         format="DD/MM/YYYY",
