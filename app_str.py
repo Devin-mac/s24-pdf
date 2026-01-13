@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import date, datetime
 import pytz
+import requests
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -356,7 +357,40 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor):
 
 
 
+def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val, total_gen, pdf_file, nombre_archivo):
+    try:
+        token = str(st.secrets["TELEGRAM_TOKEN"]).strip()
+        chat_id = str(st.secrets["TELEGRAM_CHAT_ID"]).strip()
+        
+        # Construir lista de montos dinámicamente (solo si son > 0)
+        detalles = ""
+        if om > 0: detalles += f"🔹 OM: <b>${om:,}</b>\n"
+        if gc > 0: detalles += f"🔹 GC: <b>${gc:,}</b>\n"
+        if c1_val > 0: detalles += f"🔹 {c1_nom}: <b>${c1_val:,}</b>\n"
+        if c2_val > 0: detalles += f"🔹 {c2_nom}: <b>${c2_val:,}</b>\n"
 
+        cuerpo_mensaje = (
+            "💰 <b>Se ha generado una nueva transacción S-24</b> 💰\n\n"
+            f"📝 <b>Tipo:</b> {tipo_trans}\n"
+            f"{detalles}"
+            f"📊 <b>TOTAL: ${total_gen:,} COP</b>\n\n"
+            "✅ <i>El registro oficial se adjunta a continuación.</i>"
+        )
+        
+        # Enviar Mensaje
+        url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(url_msg, json={"chat_id": chat_id, "text": cuerpo_mensaje, "parse_mode": "HTML"}, timeout=10)
+        
+        # Enviar PDF
+        url_doc = f"https://api.telegram.org/bot{token}/sendDocument"
+        pdf_file.seek(0)
+        files = {'document': (nombre_archivo, pdf_file, 'application/pdf')}
+        response = requests.post(url_doc, data={'chat_id': chat_id}, files=files, timeout=15)
+        
+        if response.status_code == 200:
+            st.success("✅ Notificación y recibo enviado a Telegram 🔔")
+    except Exception as e:
+        st.error(f"⚠️ El PDF se generó pero no se pudo notificar a Telegram: {e}")
 
 
 
@@ -404,6 +438,22 @@ if enviado:
                 Para <b>compartir</b> el archivo (por WhatsApp, Telegram, Google Drive, etc.), abre el PDF desde tu dispositivo y usa el botón de <i>Compartir</i>.
                 </div>
                 """, unsafe_allow_html=True)
+
+
+                # --- ENVÍO A TELEGRAM (Ajuste Nuevo) ---
+                enviar_donacion_telegram(
+                    tipo,           # Tipo de transacción
+                    don_obra,       # OM
+                    don_congre,     # GC
+                    conc1_nombre,   # Nombre concepto 1
+                    conc1_valor,    # Valor concepto 1
+                    conc2_nombre,   # Nombre concepto 2
+                    conc2_valor,    # Valor concepto 2
+                    total,          # Total general
+                    pdf_final,      # El buffer del PDF
+                    nombre_archivo  # El nombre .pdf
+                )
+                # ---------------------------------------
 
                 # Botón de descarga
                 st.download_button(
