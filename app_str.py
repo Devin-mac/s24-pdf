@@ -243,6 +243,12 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
 def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor):
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
+
+    # Esto ayuda a que los lectores de PDF muestren el nombre real
+    # Usamos la variable fecha_str y tipo que ya existen en tu script
+    can.setTitle(f"{fecha_str} - {tipo}") # <--- AÑADE ESTA LÍNEA
+    # ---------------------------
+    
     espaciado_lineas = 29.5
     x_base_izq = 90
     x_base_der = 700
