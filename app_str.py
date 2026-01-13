@@ -240,13 +240,13 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
         return BytesIO(pdf_bytes.getvalue())
 
 # --- Crear PDF desde cero ---
-def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor):
+def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor,titulo_metadatos):
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
 
     # Esto ayuda a que los lectores de PDF muestren el nombre real
     # Usamos la variable fecha_str y tipo que ya existen en tu script
-    can.setTitle(f"{fecha_str} - {tipo}") # <--- AÑADE ESTA LÍNEA
+    can.setTitle(titulo_metadatos) # <--- AÑADE ESTA LÍNEA
     # ---------------------------
     
     espaciado_lineas = 29.5
@@ -408,11 +408,12 @@ if enviado:
         if firma1.image_data is None or firma2.image_data is None:
             st.error("❌ Ambas firmas son obligatorias para generar el PDF.")
         else:
-            pdf_base, firma_y_position = crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor)
+            nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+            pdf_base, firma_y_position = crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor,nombre_archivo)
             pdf_final = insertar_firmas(pdf_base, firma1.image_data, firma2.image_data, firma_y_position)
             pdf_bytes = pdf_final.getvalue()
             if pdf_bytes:
-                nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+                
 
                 # --- Mostrar resumen con estilo ---
                 st.markdown('<div class="resumen-box">', unsafe_allow_html=True)
