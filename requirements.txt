@@ -6,4 +6,4 @@ PyPDF2
 numpy
 scipy
 pytz
-
+requests
