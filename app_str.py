@@ -13,6 +13,7 @@ from PyPDF2 import PdfReader, PdfWriter
 import pikepdf
 import base64
 import streamlit.components.v1 as components
+import unicodedata
 
 # ─── Configuración de página ───────────────────────────────────────────────────
 st.set_page_config(page_title="Formulario S-24", layout="centered")
@@ -381,7 +382,8 @@ if conc2_nombre and conc2_nombre != "." and conc2_valor > 0:
     _filas_prev.append((conc2_nombre[:30], f"${conc2_valor:,} COP"))
 _filas_prev.append(("TOTAL",         f"${total:,} COP"))
 _filas_prev.append(("Rellenado por", nombre_1 or "—"))
-_filas_prev.append(("Verificado por",nombre_2 or "—"))
+if nombre_2 and nombre_2.strip():
+    _filas_prev.append(("Verificado por", nombre_2))
 
 _html_prev = '<div class="summary-card"><h3>📋 Resumen — revisa antes de generar</h3>'
 for _lbl, _val in _filas_prev:
@@ -571,6 +573,14 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor, titulo_metad
     buffer.seek(0)
     return buffer, firma_y
 
+# ─── Helper: nombre de archivo seguro para Telegram (sin tildes ni ñ) ──────────────────────────────
+def sanitizar_nombre(nombre):
+    """Convierte tildes y caracteres especiales a ASCII para evitar
+    problemas en el Content-Disposition header de Telegram."""
+    normalizado = unicodedata.normalize("NFD", nombre)
+    solo_ascii  = normalizado.encode("ascii", "ignore").decode("ascii")
+    return solo_ascii
+
 # ─── Notificación Telegram ─────────────────────────────────────────────────────
 def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
                               total_gen, pdf_file, nombre_archivo):
@@ -608,7 +618,8 @@ def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
 
         url_doc = f"https://api.telegram.org/bot{token}/sendDocument"
         pdf_file.seek(0)
-        files    = {'document': (nombre_archivo, pdf_file, 'application/pdf')}
+        nombre_seguro = sanitizar_nombre(nombre_archivo)  # sin tildes para Telegram
+        files    = {'document': (nombre_seguro, pdf_file, 'application/pdf')}
         response = requests.post(url_doc, data={'chat_id': chat_id}, files=files, timeout=15)
 
         if response.status_code == 200:
