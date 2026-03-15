@@ -433,6 +433,14 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
         page = base_pdf.pages[0]
         page.merge_page(firma_pdf.pages[0])
         writer.add_page(page)
+        # Escribir metadata explicitamente en el PdfWriter para que no se pierda
+        titulo_limpio = nombre_archivo.replace(".pdf", "")
+        writer.add_metadata({
+            "/Title":   titulo_limpio,
+            "/Subject": titulo_limpio,
+            "/Author":  "Congregación S-24",
+            "/Creator": "Formulario S-24",
+        })
         out = BytesIO()
         writer.write(out)
         out.seek(0)
