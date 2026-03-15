@@ -445,6 +445,8 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor, titulo_metad
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
     can.setTitle(titulo_metadatos)
+    can.setAuthor("Congregacion S-24")
+    can.setSubject(titulo_metadatos)
 
     espaciado_lineas = 29.5
     x_base_izq = 90
@@ -554,18 +556,27 @@ def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
         token   = str(st.secrets["TELEGRAM_TOKEN"]).strip()
         chat_id = str(st.secrets["TELEGRAM_CHAT_ID"]).strip()
 
-        detalles = ""
-        if om    > 0: detalles += f"🔹 OM: <b>${om:,}</b>\n"
-        if gc    > 0: detalles += f"🔹 GC: <b>${gc:,}</b>\n"
-        if c1_val > 0: detalles += f"🔹 {c1_nom}: <b>${c1_val:,}</b>\n"
-        if c2_val > 0: detalles += f"🔹 {c2_nom}: <b>${c2_val:,}</b>\n"
-
+        sep = "─" * 26 + "\n"
+        montos = ""
+        if om     > 0: montos += f"  ▪️ Obra Mundial:  <b>${om:,}</b>\n"
+        if gc     > 0: montos += f"  ▪️ Congregación: <b>${gc:,}</b>\n"
+        if c1_val > 0: montos += f"  ▪️ {c1_nom}: <b>${c1_val:,}</b>\n"
+        if c2_val > 0: montos += f"  ▪️ {c2_nom}: <b>${c2_val:,}</b>\n"
+ 
         mensaje = (
-            "💰 <b>Se ha generado una nueva transacción S-24</b> 💰\n\n"
-            f"📝 <b>Tipo:</b> {tipo_trans}\n"
-            f"{detalles}"
-            f"📊 <b>TOTAL: ${total_gen:,} COP</b>\n\n"
-            "✅ <i>El registro oficial se adjunta a continuación.</i>"
+            "📄 <b>REGISTRO DE TRANSACCIÓN S-24</b>\n"
+            f"{sep}"
+            f"📅 <b>Fecha:</b>          {fecha_str}\n"
+            f"📝 <b>Tipo:</b>            {tipo_trans}\n"
+            f"{sep}"
+            f"{montos}"
+            f"{sep}"
+            f"💰 <b>TOTAL: ${total_gen:,} COP</b>\n"
+            f"{sep}"
+            f"✍️ <b>Rellenado por:</b>  {nombre_1 or '—'}\n"
+            f"✍️ <b>Verificado por:</b> {nombre_2 or '—'}\n"
+            f"{sep}"
+            "📎 <i>El recibo oficial se adjunta a continuación.</i>"
         )
 
         url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
