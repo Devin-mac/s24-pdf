@@ -248,11 +248,32 @@ components.html("""
 <script>
 function fixInputs() {
     var doc = window.parent.document;
+    // Keys de campos que deben ser texto libre
+    var camposTexto = ['nombre_rellena', 'nombre_verifica', 'conc1_nom', 'conc2_nom'];
+ 
     doc.querySelectorAll('input[type="text"], input[type="number"]').forEach(function(el) {
-        var labelEl = el.closest('[data-testid]') ? el.closest('[data-testid]').querySelector('label') : null;
-        var labelText = labelEl ? labelEl.innerText.toLowerCase() : '';
-        var esTextoLibre = labelText.includes('nombre') || labelText.includes('quien') || labelText.includes('concepto');
+        // Obtener el aria-label o buscar label asociado
+        var ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+        var inputId   = (el.id || '').toLowerCase();
+ 
+        // Verificar si es un campo de texto libre por su key o label
+        var esTextoLibre = camposTexto.some(function(k) {
+            return inputId.includes(k) || ariaLabel.includes(k);
+        });
+ 
+        // Segunda verificacion: buscar el label visible mas cercano
         if (!esTextoLibre) {
+            var container = el.closest('.stTextInput, .stNumberInput');
+            var labelEl   = container ? container.querySelector('label') : null;
+            var labelText = labelEl ? labelEl.innerText.toLowerCase() : '';
+            esTextoLibre  = labelText.includes('nombre') || labelText.includes('quien') ||
+                            labelText.includes('concepto') || labelText.includes('descripci');
+        }
+ 
+        if (esTextoLibre) {
+            el.setAttribute('inputmode', 'text');
+            el.removeAttribute('pattern');
+        } else {
             el.setAttribute('inputmode', 'numeric');
             el.setAttribute('pattern', '[0-9]*');
             el.setAttribute('autocomplete', 'off');
