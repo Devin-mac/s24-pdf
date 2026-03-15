@@ -626,3 +626,6 @@ if enviado:
                 )
             else:
                 st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
+    except Exception as e:
+        st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
+                
