@@ -10,6 +10,7 @@ from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfReader, PdfWriter
+import pikepdf
 import base64
 import streamlit.components.v1 as components
 
@@ -346,6 +347,8 @@ with col_n1:
     nombre_1 = st.text_input("Quien rellena", placeholder="Nombre completo", key="nombre_rellena")
 with col_n2:
     nombre_2 = st.text_input("Quien verifica", placeholder="Nombre completo", key="nombre_verifica")
+# Forzar rerender cuando nombre_2 cambia sin necesidad de salir del campo
+st.caption(f" ")  # espacio invisible que obliga rerender continuo
 
 st.markdown("**✍️ Firma — quien rellena:**")
 firma1 = st_canvas(
@@ -414,8 +417,9 @@ def procesar_firma(firma_data):
         print(f"Error procesando firma: {e}")
         return None
 
-def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
+def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos, nombre_archivo="S-24"):
     try:
+        # 1) Dibujar capa de firmas con ReportLab
         firma_buffer = BytesIO()
         c = canvas.Canvas(firma_buffer, pagesize=landscape(letter))
         for idx, fdata in enumerate([firma1_data, firma2_data]):
@@ -427,24 +431,34 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos):
                                 width=226, height=80, preserveAspectRatio=True)
         c.save()
         firma_buffer.seek(0)
+
+        # 2) Merge con PyPDF2
         base_pdf  = PdfReader(pdf_bytes)
         firma_pdf = PdfReader(firma_buffer)
         writer    = PdfWriter()
         page = base_pdf.pages[0]
         page.merge_page(firma_pdf.pages[0])
         writer.add_page(page)
-        # Escribir metadata explicitamente en el PdfWriter para que no se pierda
+        merged = BytesIO()
+        writer.write(merged)
+        merged.seek(0)
+
+        # 3) Escribir metadata con pikepdf (unico metodo confiable en movil)
         titulo_limpio = nombre_archivo.replace(".pdf", "")
-        writer.add_metadata({
-            "/Title":   titulo_limpio,
-            "/Subject": titulo_limpio,
-            "/Author":  "Congregación S-24",
-            "/Creator": "Formulario S-24",
-        })
-        out = BytesIO()
-        writer.write(out)
-        out.seek(0)
-        return out
+        merged_out = BytesIO()
+        with pikepdf.open(merged) as pdf:
+            with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
+                meta["dc:title"]   = titulo_limpio
+                meta["dc:subject"] = titulo_limpio
+                meta["dc:creator"] = ["Congregación S-24"]
+            # Tambien escribir en DocInfo clasico para lectores antiguos
+            pdf.docinfo["/Title"]   = titulo_limpio
+            pdf.docinfo["/Subject"] = titulo_limpio
+            pdf.docinfo["/Author"]  = "Congregación S-24"
+            pdf.docinfo["/Creator"] = "Formulario S-24"
+            pdf.save(merged_out)
+        merged_out.seek(0)
+        return merged_out
     except Exception as e:
         print(f"Error insertando firmas: {e}")
         return BytesIO(pdf_bytes.getvalue())
@@ -570,7 +584,7 @@ def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
         if gc     > 0: montos += f"  ▪️ Congregación: <b>${gc:,}</b>\n"
         if c1_val > 0: montos += f"  ▪️ {c1_nom}: <b>${c1_val:,}</b>\n"
         if c2_val > 0: montos += f"  ▪️ {c2_nom}: <b>${c2_val:,}</b>\n"
- 
+
         mensaje = (
             "📄 <b>REGISTRO DE TRANSACCIÓN S-24</b>\n"
             f"{sep}"
@@ -613,7 +627,8 @@ if enviado:
                                               conc2_nombre, conc2_valor,
                                               nombre_archivo)
             pdf_final  = insertar_firmas(pdf_base, firma1.image_data,
-                                         firma2.image_data, firma_y_pos)
+                                         firma2.image_data, firma_y_pos,
+                                         nombre_archivo)
             pdf_bytes  = pdf_final.getvalue()
 
             if pdf_bytes:
@@ -647,4 +662,3 @@ if enviado:
                 st.error("❌ El PDF generado está vacío. Verifica los datos ingresados.")
     except Exception as e:
         st.error(f"❌ Ocurrió un error al generar el PDF: {e}")
-                
