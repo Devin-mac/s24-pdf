@@ -672,6 +672,7 @@ if enviado:
             st.error("❌ Ambas firmas son obligatorias para generar el PDF.")
         else:
             nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+            nombre_archivo  = sanitizar_nombre(nombre_archivo)  # sin tildes en el nombre del archivo
             pdf_base, firma_y_pos = crear_pdf(conc1_nombre, conc1_valor,
                                               conc2_nombre, conc2_valor,
                                               nombre_archivo)
