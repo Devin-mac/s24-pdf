@@ -247,15 +247,32 @@ footer { visibility: hidden; }
 components.html("""
 <script>
 function fixInputs() {
-    document.querySelectorAll('input[type=number], input[type=text]').forEach(el => {
-        if (el.getAttribute('inputmode') !== 'text') {
+    var doc = window.parent.document;
+    doc.querySelectorAll('input[type="text"], input[type="number"]').forEach(function(el) {
+        var labelEl = el.closest('[data-testid]') ? el.closest('[data-testid]').querySelector('label') : null;
+        var labelText = labelEl ? labelEl.innerText.toLowerCase() : '';
+        var esTextoLibre = labelText.includes('nombre') || labelText.includes('quien') || labelText.includes('concepto');
+        if (!esTextoLibre) {
             el.setAttribute('inputmode', 'numeric');
             el.setAttribute('pattern', '[0-9]*');
+            el.setAttribute('autocomplete', 'off');
         }
     });
 }
-setTimeout(fixInputs, 800);
-setTimeout(fixInputs, 2500);
+setTimeout(fixInputs, 500);
+setTimeout(fixInputs, 1200);
+setTimeout(fixInputs, 3000);
+ 
+// Reaplicar cada vez que Streamlit regenera el DOM
+var observer = new MutationObserver(function(mutations) {
+    var huboInputs = mutations.some(function(m) {
+        return Array.from(m.addedNodes).some(function(n) {
+            return n.nodeType === 1 && (n.tagName === 'INPUT' || (n.querySelector && n.querySelector('input')));
+        });
+    });
+    if (huboInputs) { setTimeout(fixInputs, 100); }
+});
+observer.observe(window.parent.document.body, { childList: true, subtree: true });
 </script>
 """, height=0)
 
