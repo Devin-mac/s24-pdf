@@ -400,7 +400,7 @@ firma1 = st_canvas(
 )
 
 st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("-*-")#espaciado
+st.markdown("***")#espaciado
 
 st.markdown("**✍️ Firma — quien verifica:**")
 firma2 = st_canvas(
