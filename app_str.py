@@ -394,17 +394,17 @@ st.markdown("---")#espaciado
 
 st.markdown("**✍️ Firma — quien rellena:**")
 firma1 = st_canvas(
-    key="firma1", height=300, width=550,
+    key="firma1", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="black", background_color="white"
 )
 
 st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("---")#espaciado
+st.markdown("-*-")#espaciado
 
 st.markdown("**✍️ Firma — quien verifica:**")
 firma2 = st_canvas(
-    key="firma2", height=300, width=550,
+    key="firma2", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="black", background_color="white"
 )
