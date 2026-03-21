@@ -389,6 +389,9 @@ with col_n2:
 # Forzar rerender cuando nombre_2 cambia sin necesidad de salir del campo
 st.caption(f" ")  # espacio invisible que obliga rerender continuo
 
+st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
+st.markdown("---")#espaciado
+
 st.markdown("**✍️ Firma — quien rellena:**")
 firma1 = st_canvas(
     key="firma1", height=300, width=800,
@@ -397,10 +400,11 @@ firma1 = st_canvas(
 )
 
 st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("---")#espaciado
+
 st.markdown("**✍️ Firma — quien verifica:**")
 firma2 = st_canvas(
-    key="firma2", height=300, width=800,
+    key="firma2", height=300, width=400,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="black", background_color="white"
 )
