@@ -439,6 +439,14 @@ for _lbl, _val in _filas_prev:
 _html_prev += '</div>'
 st.markdown(_html_prev, unsafe_allow_html=True)
 
+st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
+st.markdown("---")#espaciado
+st.markdown("🔒 **Clave de notificación a telegram** *(opcional)*")
+ clave_ingresada = st.text_input(
+     "Clave", placeholder="Ingresa la clave de notificación ",
+    type="password", key="clave_notif"
+
+
 enviado = st.button("📤 Confirmar y generar PDF", use_container_width=True)
 
 # ─── Funciones PDF (exactamente como en el archivo funcional) ──────────────────
@@ -698,13 +706,18 @@ if enviado:
                 """, unsafe_allow_html=True)
 
                 # — Telegram —
-                enviar_donacion_telegram(
-                    tipo, don_obra, don_congre,
-                    conc1_nombre, conc1_valor,
-                    conc2_nombre, conc2_valor,
-                    total, pdf_final, nombre_archivo
-                )
-
+                # Solo notificar si la clave es correcta
+                clave_correcta = "50286"  # cambia esta clave por la que quieras
+                if clave_ingresada.strip() == clave_correcta:
+                    enviar_donacion_telegram(
+                        tipo, don_obra, don_congre,
+                        conc1_nombre, conc1_valor,
+                        conc2_nombre, conc2_valor,
+                        total, pdf_final, nombre_archivo
+                    )
+                else:
+                    if clave_ingresada.strip() != "":
+                        st.warning("⚠️ Clave incorrecta — el PDF se generó pero no se envió notificación.")
                 # — Descarga —
                 st.download_button(
                     "📥 Descargar PDF",
