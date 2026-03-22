@@ -442,10 +442,11 @@ st.markdown(_html_prev, unsafe_allow_html=True)
 st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
 st.markdown("---")#espaciado
 st.markdown("🔒 **Clave de notificación a telegram** *(opcional)*")
- clave_ingresada = st.text_input(
-     "Clave", placeholder="Ingresa la clave de notificación ",
+clave_ingresada = st.text_input(
+    "Clave", placeholder="Ingresa la clave si perteneces al grupo",
     type="password", key="clave_notif"
-
+)
+ 
 
 enviado = st.button("📤 Confirmar y generar PDF", use_container_width=True)
 
