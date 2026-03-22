@@ -371,7 +371,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # — Otros conceptos —
 st.markdown('<div class="section-card"><div class="section-title">📌 Otros conceptos o Depósito en caja 🏦</div>', unsafe_allow_html=True)
 conc1_nombre = st.text_input("Descripción No 1", value=".", key="conc1_nom")
-conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Depósito en caja o valor descripcion 1")
+conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Depósito en caja o valor descripción 1")
 conc2_nombre = st.text_input("Descripción No 2", value=".", key="conc2_nom")
 conc2_valor  = formatear_numero_elegante("conc2_valor_key", "Valor descripción 2")
 
