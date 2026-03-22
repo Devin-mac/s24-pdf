@@ -369,11 +369,11 @@ don_congre = formatear_numero_elegante("don_congre_key", "Gastos de la Congregac
 st.markdown('</div>', unsafe_allow_html=True)
 
 # — Otros conceptos —
-st.markdown('<div class="section-card"><div class="section-title">📌 Otros conceptos</div>', unsafe_allow_html=True)
-conc1_nombre = st.text_input("Nombre del Concepto 1", value=".", key="conc1_nom")
-conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Valor del Concepto 1")
-conc2_nombre = st.text_input("Nombre del Concepto 2", value=".", key="conc2_nom")
-conc2_valor  = formatear_numero_elegante("conc2_valor_key", "Valor del Concepto 2")
+st.markdown('<div class="section-card"><div class="section-title">📌 Otros conceptos o Depósito en caja 🏦</div>', unsafe_allow_html=True)
+conc1_nombre = st.text_input("Descripción No 1", value=".", key="conc1_nom")
+conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Depósito en caja o valor descripcion 1")
+conc2_nombre = st.text_input("Descripción No 2", value=".", key="conc2_nom")
+conc2_valor  = formatear_numero_elegante("conc2_valor_key", "Valor descripción 2")
 
 total = don_obra + don_congre + conc1_valor + conc2_valor
 st.markdown(f'<div class="total-box">TOTAL: ${total:,} COP</div>', unsafe_allow_html=True)
@@ -443,7 +443,7 @@ st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
 st.markdown("---")#espaciado
 st.markdown("🔒 **Clave de notificación a telegram** *(opcional)*")
 clave_ingresada = st.text_input(
-    "Clave", placeholder="Ingresa la clave si perteneces al grupo",
+    "Clave", placeholder="Ingresa la clave para enviar notificación",
     type="password", key="clave_notif"
 )
  
