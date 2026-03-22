@@ -718,7 +718,7 @@ if enviado:
                     )
                 else:
                     if clave_ingresada.strip() != "":
-                        st.warning("⚠️ Clave incorrecta — el PDF se generó pero no se envió notificación.")
+                        st.warning("El PDF se generó correctamente sin notificación.")
                 # — Descarga —
                 st.download_button(
                     "📥 Descargar PDF",
