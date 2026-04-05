@@ -11,9 +11,9 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfReader, PdfWriter
 import pikepdf
+import unicodedata
 import base64
 import streamlit.components.v1 as components
-import unicodedata
 
 # ─── Configuración de página ───────────────────────────────────────────────────
 st.set_page_config(page_title="Formulario S-24", layout="centered")
@@ -250,17 +250,17 @@ function fixInputs() {
     var doc = window.parent.document;
     // Keys de campos que deben ser texto libre
     var camposTexto = ['nombre_rellena', 'nombre_verifica', 'conc1_nom', 'conc2_nom'];
- 
+
     doc.querySelectorAll('input[type="text"], input[type="number"]').forEach(function(el) {
         // Obtener el aria-label o buscar label asociado
         var ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
         var inputId   = (el.id || '').toLowerCase();
- 
+
         // Verificar si es un campo de texto libre por su key o label
         var esTextoLibre = camposTexto.some(function(k) {
             return inputId.includes(k) || ariaLabel.includes(k);
         });
- 
+
         // Segunda verificacion: buscar el label visible mas cercano
         if (!esTextoLibre) {
             var container = el.closest('.stTextInput, .stNumberInput');
@@ -269,7 +269,7 @@ function fixInputs() {
             esTextoLibre  = labelText.includes('nombre') || labelText.includes('quien') ||
                             labelText.includes('concepto') || labelText.includes('descripci');
         }
- 
+
         if (esTextoLibre) {
             el.setAttribute('inputmode', 'text');
             el.removeAttribute('pattern');
@@ -283,7 +283,7 @@ function fixInputs() {
 setTimeout(fixInputs, 500);
 setTimeout(fixInputs, 1200);
 setTimeout(fixInputs, 3000);
- 
+
 // Reaplicar cada vez que Streamlit regenera el DOM
 var observer = new MutationObserver(function(mutations) {
     var huboInputs = mutations.some(function(m) {
@@ -362,93 +362,124 @@ tipo = st.radio("", [
 ], label_visibility="collapsed", key="tipo_trans")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# — Donaciones —
-st.markdown('<div class="section-card"><div class="section-title">💰 Donaciones</div>', unsafe_allow_html=True)
-don_obra   = formatear_numero_elegante("don_obra_key",   "Obra Mundial (OM)")
-don_congre = formatear_numero_elegante("don_congre_key", "Gastos de la Congregación (GC)")
-st.markdown('</div>', unsafe_allow_html=True)
 
-# — Otros conceptos —
-st.markdown('<div class="section-card"><div class="section-title">📌 Otros conceptos o Depósito en caja 🏦</div>', unsafe_allow_html=True)
-conc1_nombre = st.text_input("Descripción No 1", value=".", key="conc1_nom")
-conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Depósito en caja o valor descripción 1")
-conc2_nombre = st.text_input("Descripción No 2", value=".", key="conc2_nom")
-conc2_valor  = formatear_numero_elegante("conc2_valor_key", "Valor descripción 2")
-
-total = don_obra + don_congre + conc1_valor + conc2_valor
-st.markdown(f'<div class="total-box">TOTAL: ${total:,} COP</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-
-# — Personas y firmas —
+# — Personas —
 st.markdown('<div class="section-card"><div class="section-title">👤 Personas responsables</div>', unsafe_allow_html=True)
 col_n1, col_n2 = st.columns(2)
 with col_n1:
     nombre_1 = st.text_input("Quien rellena", placeholder="Nombre completo", key="nombre_rellena")
 with col_n2:
     nombre_2 = st.text_input("Quien verifica", placeholder="Nombre completo", key="nombre_verifica")
+st.markdown('</div>', unsafe_allow_html=True)
 # Forzar rerender cuando nombre_2 cambia sin necesidad de salir del campo
 st.caption(f" ")  # espacio invisible que obliga rerender continuo
 
-st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("---")#espaciado
-
-st.markdown("**✍️ Firma — quien rellena:**")
+# — Firmas —
+st.markdown("### ✍️ Firmas")
+st.markdown("**Firma — quien rellena:**")
 firma1 = st_canvas(
     key="firma1", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
-    stroke_color="black", background_color="white"
+    stroke_color="#000000", background_color="#ffffff"
 )
 
-st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("***")#espaciado
-
-st.markdown("**✍️ Firma — quien verifica:**")
+st.markdown("---")
+st.markdown("**Firma — quien verifica:**")
 firma2 = st_canvas(
     key="firma2", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
-    stroke_color="black", background_color="white"
+    stroke_color="#000000", background_color="#ffffff"
 )
-st.markdown('</div>', unsafe_allow_html=True)
 
-# ── Resumen en vivo ANTES del botón ───────────────────────────────────────────
+
+# ── Limpiar campos al cambiar tipo de transacción ──────────────────────────────
+if "tipo_anterior" not in st.session_state:
+    st.session_state["tipo_anterior"] = tipo
+if st.session_state["tipo_anterior"] != tipo:
+    for k in ["don_obra_key","don_congre_key","conc1_nom","conc1_valor_key",
+              "conc2_nom","conc2_valor_key","deposito_key"]:
+        if k in st.session_state:
+            del st.session_state[k]
+    st.session_state["tipo_anterior"] = tipo
+
+# — Campos dinámicos según tipo —
+don_obra = don_congre = conc1_valor = conc2_valor = deposito_valor = 0
+conc1_nombre = conc2_nombre = "."
+
+if tipo == "DONACIÓN":
+    st.markdown('<div class="section-card"><div class="section-title">💰 Donaciones</div>', unsafe_allow_html=True)
+    don_obra   = formatear_numero_elegante("don_obra_key",   "Obra Mundial (OM)")
+    don_congre = formatear_numero_elegante("don_congre_key", "Gastos de la Congregación (GC)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+elif tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO":
+    st.markdown('<div class="section-card"><div class="section-title">🏦 Depósito en caja</div>', unsafe_allow_html=True)
+    deposito_valor = formatear_numero_elegante("deposito_key", "Valor del depósito")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+else:  # PAGO, ADELANTO DE EFECTIVO, OTRO
+    st.markdown('<div class="section-card"><div class="section-title">📌 Conceptos</div>', unsafe_allow_html=True)
+    conc1_nombre = st.text_input("Nombre del Concepto 1", value=".", key="conc1_nom").upper()
+    conc1_valor  = formatear_numero_elegante("conc1_valor_key", "Valor del Concepto 1")
+    conc2_nombre = st.text_input("Nombre del Concepto 2", value=".", key="conc2_nom").upper()
+    conc2_valor  = formatear_numero_elegante("conc2_valor_key", "Valor del Concepto 2")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+total = don_obra + don_congre + conc1_valor + conc2_valor + deposito_valor
+st.markdown(f'<div class="total-box">TOTAL: ${total:,} COP</div>', unsafe_allow_html=True)
+# — Clave —
 st.markdown("---")
-_filas_prev = [
-    ("Fecha",        fecha_str),
-    ("Tipo",         tipo),
-    ("Obra Mundial", f"${don_obra:,} COP"),
-    ("Congregación", f"${don_congre:,} COP"),
-]
-if conc1_nombre and conc1_nombre != "." and conc1_valor > 0:
-    _filas_prev.append((conc1_nombre[:30], f"${conc1_valor:,} COP"))
-if conc2_nombre and conc2_nombre != "." and conc2_valor > 0:
-    _filas_prev.append((conc2_nombre[:30], f"${conc2_valor:,} COP"))
-_filas_prev.append(("TOTAL",         f"${total:,} COP"))
-_filas_prev.append(("Rellenado por", nombre_1 or "—"))
-if nombre_2 and nombre_2.strip():
-    _filas_prev.append(("Verificado por", nombre_2))
-
-_html_prev = '<div class="summary-card"><h3>📋 Resumen — revisa antes de generar</h3>'
-for _lbl, _val in _filas_prev:
-    _bold = " style='font-size:1.15rem;color:#0c4a6e;'" if _lbl == "TOTAL" else ""
-    _html_prev += (
-        f'<div class="summary-row">'
-        f'<span class="summary-label">{_lbl}</span>'
-        f'<span class="summary-value"{_bold}>{_val}</span>'
-        f'</div>'
-    )
-_html_prev += '</div>'
-st.markdown(_html_prev, unsafe_allow_html=True)
-
-st.markdown('<div class="firma-spacer"></div>', unsafe_allow_html=True)
-st.markdown("---")#espaciado
-st.markdown("🔒 **Clave de notificación a telegram** *(opcional)*")
+st.markdown("🔒 **Clave de notificación** *(opcional — solo para el grupo autorizado)*")
 clave_ingresada = st.text_input(
-    "Clave", placeholder="Ingresa la clave para enviar notificación",
+    "Clave", placeholder="Ingresa la clave si perteneces al grupo",
     type="password", key="clave_notif"
 )
- 
 
-enviado = st.button("📤 Confirmar y generar PDF", use_container_width=True)
+# ── Resumen bajo demanda + botón generar ──────────────────────────────────────
+st.markdown("---")
+ 
+if "mostrar_resumen" not in st.session_state:
+    st.session_state["mostrar_resumen"] = False
+ 
+if st.button("📋 Ver(Actualizar) resumen", use_container_width=True):
+    st.session_state["mostrar_resumen"] = True
+ 
+if st.session_state["mostrar_resumen"]:
+    _filas_prev = [
+        ("Fecha", fecha_str),
+        ("Tipo",  tipo),
+    ]
+    if tipo == "DONACIÓN":
+        _filas_prev.append(("Obra Mundial",  f"${don_obra:,} COP"))
+        _filas_prev.append(("Congregación",  f"${don_congre:,} COP"))
+    elif tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO":
+        _filas_prev.append(("Depósito",      f"${deposito_valor:,} COP"))
+    else:
+        if conc1_nombre and conc1_nombre != "." and conc1_valor > 0:
+            _filas_prev.append((conc1_nombre[:30], f"${conc1_valor:,} COP"))
+        if conc2_nombre and conc2_nombre != "." and conc2_valor > 0:
+            _filas_prev.append((conc2_nombre[:30], f"${conc2_valor:,} COP"))
+    _filas_prev.append(("TOTAL",          f"${total:,} COP"))
+    _filas_prev.append(("Rellenado por",  nombre_1 or "—"))
+    if nombre_2 and nombre_2.strip():
+        _filas_prev.append(("Verificado por", nombre_2))
+ 
+    _html_prev = '<div class="summary-card"><h3>📋 Resumen — revisa antes de generar</h3>'
+    for _lbl, _val in _filas_prev:
+        _bold = " style='font-size:1.15rem;color:#0c4a6e;'" if _lbl == "TOTAL" else ""
+        _html_prev += (
+            f'<div class="summary-row">'
+            f'<span class="summary-label">{_lbl}</span>'
+            f'<span class="summary-value"{_bold}>{_val}</span>'
+            f'</div>'
+        )
+    _html_prev += '</div>'
+    st.markdown(_html_prev, unsafe_allow_html=True)
+    st.markdown("")
+    enviado = st.button("📤 Confirmar y generar PDF", use_container_width=True)
+else:
+    enviado = False
+
 
 # ─── Funciones PDF (exactamente como en el archivo funcional) ──────────────────
 def dibujar_checkbox_cuadrado(c, x, y, marcado=False, size=18):
@@ -516,7 +547,7 @@ def insertar_firmas(pdf_bytes, firma1_data, firma2_data, firma_y_pos, nombre_arc
         print(f"Error insertando firmas: {e}")
         return BytesIO(pdf_bytes.getvalue())
 
-def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor, titulo_metadatos):
+def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor, titulo_metadatos, deposito_valor=0):
     buffer = BytesIO()
     can = canvas.Canvas(buffer, pagesize=landscape(letter))
     can.setTitle(titulo_metadatos)
@@ -568,31 +599,45 @@ def crear_pdf(conc1_nombre, conc1_valor, conc2_nombre, conc2_valor, titulo_metad
     y -= 45
 
     can.setFont("Helvetica", 18)
+
+    # Línea 1: Donaciones Obra mundial — siempre presente
     can.drawString(x_izq, y, "Donaciones (Obra mundial)")
-    can.drawRightString(x_der, y, f"{don_obra:,.2f}")
+    can.drawRightString(x_der, y, f"{don_obra:,.2f}" if don_obra > 0 else "")
+    can.line(x_inicio_lineas, y - 4, x_der, y - 4)
     y -= espaciado_lineas
 
+    # Línea 2: Donaciones Congregación — siempre presente
     can.drawString(x_izq, y, "Donaciones (Gastos de la congregación)")
-    can.drawRightString(x_der, y, f"{don_congre:,.2f}")
+    can.drawRightString(x_der, y, f"{don_congre:,.2f}" if don_congre > 0 else "")
+    can.line(x_inicio_lineas, y - 4, x_der, y - 4)
     y -= espaciado_lineas
 
-    conceptos_mostrados = 0
-    if conc1_nombre and conc1_valor > 0:
-        can.drawString(x_izq, y, conc1_nombre)
-        can.drawRightString(x_der, y, f"{conc1_valor:,.2f}")
-        y -= espaciado_lineas
-        conceptos_mostrados += 1
-    if conc2_nombre and conc2_valor > 0:
-        can.drawString(x_izq, y, conc2_nombre)
-        can.drawRightString(x_der, y, f"{conc2_valor:,.2f}")
-        y -= espaciado_lineas
-        conceptos_mostrados += 1
-
-    for _ in range(3 - conceptos_mostrados):
-        x_concepto_fin = x_inicio_lineas - separacion_conceptos
-        can.line(x_izq, y + 2, x_concepto_fin, y + 2)
-        can.line(x_inicio_lineas, y + 2, x_der,  y + 2)
-        y -= espaciado_lineas
+    # Líneas 3-5: conceptos adicionales según tipo
+    if tipo == "DEPÓSITO EN LA CAJA DE EFECTIVO":
+        # El valor del depósito va directo al total, líneas en blanco
+        for _ in range(3):
+            x_concepto_fin = x_inicio_lineas - separacion_conceptos
+            can.line(x_izq, y + 2, x_concepto_fin, y + 2)
+            can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+            y -= espaciado_lineas
+    else:
+        # DONACIÓN, PAGO, ADELANTO, OTRO — mostrar conceptos si los hay
+        conceptos_mostrados = 0
+        if conc1_nombre and conc1_nombre != "." and conc1_valor > 0:
+            can.drawString(x_izq, y, conc1_nombre)
+            can.drawRightString(x_der, y, f"{conc1_valor:,.2f}")
+            y -= espaciado_lineas
+            conceptos_mostrados += 1
+        if conc2_nombre and conc2_nombre != "." and conc2_valor > 0:
+            can.drawString(x_izq, y, conc2_nombre)
+            can.drawRightString(x_der, y, f"{conc2_valor:,.2f}")
+            y -= espaciado_lineas
+            conceptos_mostrados += 1
+        for _ in range(3 - conceptos_mostrados):
+            x_concepto_fin = x_inicio_lineas - separacion_conceptos
+            can.line(x_izq, y + 2, x_concepto_fin, y + 2)
+            can.line(x_inicio_lineas, y + 2, x_der, y + 2)
+            y -= espaciado_lineas
 
     y -= 15
     can.setFont("Helvetica-Bold", 22)
@@ -669,8 +714,7 @@ def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
 
         url_doc = f"https://api.telegram.org/bot{token}/sendDocument"
         pdf_file.seek(0)
-        nombre_seguro = sanitizar_nombre(nombre_archivo)  # sin tildes para Telegram
-        files    = {'document': (nombre_seguro, pdf_file, 'application/pdf')}
+        files    = {'document': (nombre_archivo, pdf_file, 'application/pdf')}
         response = requests.post(url_doc, data={'chat_id': chat_id}, files=files, timeout=15)
 
         if response.status_code == 200:
@@ -684,11 +728,11 @@ if enviado:
         if firma1.image_data is None or firma2.image_data is None:
             st.error("❌ Ambas firmas son obligatorias para generar el PDF.")
         else:
-            nombre_archivo = f"{fecha_str} - {tipo}.pdf"
+            nombre_archivo  = f"{fecha_str} - {tipo}.pdf"
             nombre_archivo  = sanitizar_nombre(nombre_archivo)  # sin tildes en el nombre del archivo
             pdf_base, firma_y_pos = crear_pdf(conc1_nombre, conc1_valor,
                                               conc2_nombre, conc2_valor,
-                                              nombre_archivo)
+                                              nombre_archivo, deposito_valor)
             pdf_final  = insertar_firmas(pdf_base, firma1.image_data,
                                          firma2.image_data, firma_y_pos,
                                          nombre_archivo)
@@ -708,17 +752,22 @@ if enviado:
 
                 # — Telegram —
                 # Solo notificar si la clave es correcta
-                clave_correcta = "50286"  # cambia esta clave por la que quieras
+                clave_correcta = "s24jw"  # cambia esta clave por la que quieras
+                _c1n = conc1_nombre if tipo not in ["DONACIU00d3N","DEPU00d3SITO EN LA CAJA DE EFECTIVO"] else "Depósito"
+                _c1v = conc1_valor  if tipo not in ["DONACIU00d3N","DEPU00d3SITO EN LA CAJA DE EFECTIVO"] else deposito_valor
                 if clave_ingresada.strip() == clave_correcta:
                     enviar_donacion_telegram(
-                        tipo, don_obra, don_congre,
-                        conc1_nombre, conc1_valor,
+                        tipo,
+                        don_obra   if tipo == "DONACIÓN" else 0,
+                        don_congre if tipo == "DONACIÓN" else 0,
+                        _c1n, _c1v,
                         conc2_nombre, conc2_valor,
                         total, pdf_final, nombre_archivo
                     )
                 else:
                     if clave_ingresada.strip() != "":
-                        st.warning("El PDF se generó correctamente sin notificación.")
+                        st.warning("⚠️ Clave incorrecta — el PDF se generó pero no se envió notificación.")
+
                 # — Descarga —
                 st.download_button(
                     "📥 Descargar PDF",
