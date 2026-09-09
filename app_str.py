@@ -381,6 +381,7 @@ firma1 = st_canvas(
     key="firma1", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="#000000", background_color="#ffffff"
+    return_image_data=True
 )
 
 st.markdown("---")
@@ -389,6 +390,7 @@ firma2 = st_canvas(
     key="firma2", height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="#000000", background_color="#ffffff"
+    return_image_data=True
 )
 
 
