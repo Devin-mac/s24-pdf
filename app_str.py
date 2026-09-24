@@ -338,7 +338,7 @@ st.markdown("""
 def formatear_numero_elegante(key, label, help_text="Monto en pesos colombianos"):
     col_input, col_fmt = st.columns([2, 1])
     with col_input:
-        valor_raw = st.text_input(label, key=key, placeholder="Ej: 50000", help=help_text)
+        valor_raw = st.text_input(label, key=key, placeholder="Ej: 5.000", help=help_text)
     if valor_raw and valor_raw.strip():
         try:
             solo = ''.join(filter(str.isdigit, valor_raw))
@@ -387,9 +387,9 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-card"><div class="section-title">👤 Personas responsables</div>', unsafe_allow_html=True)
 col_n1, col_n2 = st.columns(2)
 with col_n1:
-    nombre_1 = st.text_input("Quien rellena", placeholder="Nombre completo", key="nombre_rellena")
+    nombre_1 = st.text_input("Quien rellena", placeholder="Nombre", key="nombre_rellena")
 with col_n2:
-    nombre_2 = st.text_input("Quien verifica", placeholder="Nombre completo", key="nombre_verifica")
+    nombre_2 = st.text_input("Quien verifica", placeholder="Nombre", key="nombre_verifica")
 st.markdown('</div>', unsafe_allow_html=True)
 # Forzar rerender cuando nombre_2 cambia sin necesidad de salir del campo
 st.caption(f" ")  # espacio invisible que obliga rerender continuo
@@ -436,7 +436,8 @@ firma2 = st_canvas(
     return_image_data=True
 )
  
-
+st.markdown("---")
+st.markdown("---")
 
 # ── Limpiar campos al cambiar tipo de transacción ──────────────────────────────
 if "tipo_anterior" not in st.session_state:
