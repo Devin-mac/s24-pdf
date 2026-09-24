@@ -246,6 +246,20 @@ footer { visibility: hidden; }
 # ─── Teclado numérico en móvil ─────────────────────────────────────────────────
 components.html("""
 <script>
+function formatearMiles(el) {
+    var cursorDesdeElFinal = el.value.length - el.selectionStart;
+    var soloDigitos = el.value.replace(/\D/g, '');
+    var formateado = soloDigitos.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    // Truco para que React (frontend de Streamlit) detecte el cambio real
+    var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    setter.call(el, formateado);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+
+    var nuevaPos = Math.max(formateado.length - cursorDesdeElFinal, 0);
+    el.setSelectionRange(nuevaPos, nuevaPos);
+}
+
 function fixInputs() {
     var doc = window.parent.document;
     // Keys de campos que deben ser texto libre
@@ -277,6 +291,10 @@ function fixInputs() {
             el.setAttribute('inputmode', 'numeric');
             el.setAttribute('pattern', '[0-9]*');
             el.setAttribute('autocomplete', 'off');
+            if (!el.dataset.milesListener) {
+                el.addEventListener('input', function() { formatearMiles(el); });
+                el.dataset.milesListener = "true";
+            }
         }
     });
 }
