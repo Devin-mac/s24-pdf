@@ -376,22 +376,46 @@ st.caption(f" ")  # espacio invisible que obliga rerender continuo
 
 # — Firmas —
 st.markdown("### ✍️ Firmas")
-st.markdown("**Firma — quien rellena:**")
-firma1 = st_canvas(
-    key="firma1", height=240, width=550,
-    drawing_mode="freedraw", stroke_width=2,
-    stroke_color="#000000", background_color="#ffffff",
-    return_image_data=True
-)
 
-st.markdown("---")
-st.markdown("**Firma — quien verifica:**")
-firma2 = st_canvas(
-    key="firma2", height=240, width=550,
+if "firma1_version" not in st.session_state:
+    st.session_state["firma1_version"] = 0
+if "firma2_version" not in st.session_state:
+    st.session_state["firma2_version"] = 0
+ 
+col_f1_txt, col_f1_btn = st.columns([4, 1])
+with col_f1_txt:
+    st.markdown("**Firma — quien rellena:**")
+with col_f1_btn:
+    if st.button("🗑️ Borrar", key="borrar_firma1"):
+        st.session_state["firma1_version"] += 1
+        st.rerun()
+ 
+firma1 = st_canvas(
+    key=f"firma1_{st.session_state['firma1_version']}",
+    height=240, width=550,
     drawing_mode="freedraw", stroke_width=2,
     stroke_color="#000000", background_color="#ffffff",
     return_image_data=True
 )
+ 
+st.markdown("---")
+ 
+col_f2_txt, col_f2_btn = st.columns([4, 1])
+with col_f2_txt:
+    st.markdown("**Firma — quien verifica:**")
+with col_f2_btn:
+    if st.button("🗑️ Borrar", key="borrar_firma2"):
+        st.session_state["firma2_version"] += 1
+        st.rerun()
+ 
+firma2 = st_canvas(
+    key=f"firma2_{st.session_state['firma2_version']}",
+    height=240, width=550,
+    drawing_mode="freedraw", stroke_width=2,
+    stroke_color="#000000", background_color="#ffffff",
+    return_image_data=True
+)
+ 
 
 
 # ── Limpiar campos al cambiar tipo de transacción ──────────────────────────────
