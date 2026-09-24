@@ -100,12 +100,14 @@ input[type="number"],
 .stTextInput input,
 .stNumberInput input,
 .stDateInput input {
-    font-size: 1.2rem !important;
+    font-size: 2.2rem !important;
     font-weight: 500 !important;
     color: var(--text-main) !important;
     background: var(--bg-input) !important;
     padding: 0.85rem 1.1rem !important;
-    height: 3.4rem !important;
+    height: 6.8rem !important;
+    display: flex !important;
+    align-items: center !important;
     border-radius: 10px !important;
     border: 2px solid var(--border) !important;
     border-bottom: 2px solid var(--border) !important;
