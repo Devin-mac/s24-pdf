@@ -1,17 +1,37 @@
 """
 Notificación por Telegram al generar un PDF.
 
-NOTA DE REFACTOR: igual que con crear_pdf, la función original leía
-`fecha_str`, `nombre_1` y `nombre_2` del ámbito global. Aquí se reciben
-como parámetros explícitos.
+Si algo falla, se muestra en pantalla el motivo real que devuelve Telegram
+(sin exponer el token).
 """
 import streamlit as st
 import requests
 
 
+def _explicar_error(resp, token):
+    """Devuelve un texto claro con el motivo del fallo de la API de Telegram."""
+    try:
+        datos = resp.json()
+    except Exception:
+        datos = {}
+    descripcion = str(datos.get("description", resp.text[:200])).replace(token, "***")
+    pista = ""
+    if resp.status_code == 401:
+        pista = " → El TELEGRAM_TOKEN es inválido o fue revocado. Revisá los Secrets."
+    elif resp.status_code == 400 and "chat not found" in descripcion.lower():
+        pista = " → TELEGRAM_CHAT_ID incorrecto, o el bot no está dentro del grupo."
+    elif resp.status_code == 400 and "upgraded to a supergroup" in descripcion.lower():
+        nuevo = datos.get("parameters", {}).get("migrate_to_chat_id")
+        pista = f" → El grupo pasó a supergrupo. Nuevo TELEGRAM_CHAT_ID: {nuevo}"
+    elif resp.status_code == 403:
+        pista = " → El bot fue expulsado del grupo o no tiene permiso para escribir."
+    return f"Telegram respondió {resp.status_code}: {descripcion}{pista}"
+
+
 def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
                               total_gen, pdf_file, nombre_archivo,
                               fecha_str, nombre_1, nombre_2):
+    token = ""
     try:
         token = str(st.secrets["TELEGRAM_TOKEN"]).strip()
         chat_id = str(st.secrets["TELEGRAM_CHAT_ID"]).strip()
@@ -39,17 +59,28 @@ def enviar_donacion_telegram(tipo_trans, om, gc, c1_nom, c1_val, c2_nom, c2_val,
             "📎 <i>El recibo oficial se adjunta a continuación.</i>"
         )
 
-        url_msg = f"https://api.telegram.org/bot{token}/sendMessage"
-        requests.post(url_msg,
-                      json={"chat_id": chat_id, "text": mensaje, "parse_mode": "HTML"},
-                      timeout=10)
+        r_msg = requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": mensaje, "parse_mode": "HTML"},
+            timeout=10,
+        )
+        if r_msg.status_code != 200:
+            st.error("⚠️ No se pudo enviar el mensaje a Telegram. " + _explicar_error(r_msg, token))
+            return
 
-        url_doc = f"https://api.telegram.org/bot{token}/sendDocument"
         pdf_file.seek(0)
         files = {'document': (nombre_archivo, pdf_file, 'application/pdf')}
-        response = requests.post(url_doc, data={'chat_id': chat_id}, files=files, timeout=15)
-
-        if response.status_code == 200:
+        r_doc = requests.post(
+            f"https://api.telegram.org/bot{token}/sendDocument",
+            data={'chat_id': chat_id}, files=files, timeout=15,
+        )
+        if r_doc.status_code == 200:
             st.success("✅ Notificación y recibo enviados a Telegram 🔔")
+        else:
+            st.error("⚠️ El mensaje llegó, pero no se pudo enviar el PDF. " + _explicar_error(r_doc, token))
+
+    except KeyError as e:
+        st.error(f"⚠️ Falta el secreto {e} en Streamlit (Settings → Secrets).")
     except Exception as e:
-        st.error(f"⚠️ El PDF se generó pero no se pudo notificar a Telegram: {e}")
+        detalle = str(e).replace(token, "***") if token else str(e)
+        st.error(f"⚠️ El PDF se generó pero no se pudo notificar a Telegram: {detalle}")
