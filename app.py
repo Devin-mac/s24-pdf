@@ -15,7 +15,7 @@ from utils.formato import formatear_fecha_espanol, sanitizar_nombre
 st.set_page_config(page_title="Formulario S-24", layout="centered")
 
 # ─── CSS y JS ───────────────────────────────────────────────────────────────────
-#inyectar_estilos()
+inyectar_estilos()
 inyectar_scripts()
 
 # ─── Zona horaria Colombia ─────────────────────────────────────────────────────
