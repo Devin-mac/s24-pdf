@@ -13,7 +13,7 @@ import streamlit.components.v1 as components
 
 # ── Tamaño de las pestañas: ajustá aquí a tu gusto ────────────────────────────
 TAB_ALTO = "2.4rem"
-TAB_LETRA = "1rem"
+TAB_LETRA = "1.2rem"
 TAB_PADDING = "0 0.9rem"
 
 CODIGO_PAGINA = r"""
