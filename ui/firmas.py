@@ -19,11 +19,14 @@ def widget_firma(prefijo, etiqueta):
     """
     key_version = f"{prefijo}_version"
     key_json = f"{prefijo}_json"
+    key_version_aplicada = f"{prefijo}_version_aplicada"
 
     if key_version not in st.session_state:
         st.session_state[key_version] = 0
     if key_json not in st.session_state:
         st.session_state[key_json] = None
+    if key_version_aplicada not in st.session_state:
+        st.session_state[key_version_aplicada] = -1
 
     col_txt, col_undo, col_btn = st.columns([3, 1, 1])
     with col_txt:
@@ -42,13 +45,24 @@ def widget_firma(prefijo, etiqueta):
             st.session_state[key_version] += 1
             st.rerun()
 
+    # Solo se pasa initial_drawing en el primer render de un canvas "nuevo"
+    # (justo después de Deshacer/Borrar). En cualquier otro rerun se deja en
+    # None para no interferir con el dibujo que el usuario está haciendo
+    # ahora mismo — pasarlo siempre causaba que el segundo trazo "parpadeara".
+    version_actual = st.session_state[key_version]
+    if st.session_state[key_version_aplicada] != version_actual:
+        dibujo_inicial = st.session_state[key_json]
+        st.session_state[key_version_aplicada] = version_actual
+    else:
+        dibujo_inicial = None
+
     resultado = st_canvas(
-        key=f"{prefijo}_{st.session_state[key_version]}",
+        key=f"{prefijo}_{version_actual}",
         height=240, width=550,
         drawing_mode="freedraw", stroke_width=2,
         stroke_color="#000000", background_color="#ffffff",
         return_image_data=True,
-        initial_drawing=st.session_state[key_json],
+        initial_drawing=dibujo_inicial,
     )
     if resultado.json_data is not None:
         st.session_state[key_json] = resultado.json_data
