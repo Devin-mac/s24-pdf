@@ -35,17 +35,28 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* ── Encabezado ── */
+/* ── Márgenes de Streamlit: recortados para ganar espacio en pantalla ── */
+[data-testid="stHeader"],
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+.block-container,
+[data-testid="stMainBlockContainer"] {
+    padding-top: 0.8rem !important;
+    padding-bottom: 2rem !important;
+}
+
+/* ── Encabezado (compacto) ── */
 .main-header {
     background: linear-gradient(135deg, #1a3a6e 0%, #2563eb 100%);
     color: #ffffff !important;
-    padding: 2rem 2rem 1.5rem 2rem;
-    border-radius: 16px;
-    margin-bottom: 2rem;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.22);
+    padding: 0.7rem 1.1rem;
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 4px 14px rgba(37,99,235,0.22);
 }
-.main-header h1 { font-size: 1.7rem; font-weight: 700; margin: 0 0 0.3rem 0; color: #ffffff !important; }
-.main-header p  { font-size: 0.95rem; opacity: 0.85; margin: 0; color: #ffffff !important; }
+.main-header h1 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.1rem 0; padding: 0; color: #ffffff !important; }
+.main-header p  { font-size: 0.8rem; opacity: 0.85; margin: 0; color: #ffffff !important; }
 
 /* ── Tarjetas de sección ── */
 .section-card {
